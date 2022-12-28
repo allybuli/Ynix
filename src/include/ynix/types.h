@@ -11,6 +11,8 @@
 
 #define _packed __attribute__((packed))
 
+typedef unsigned int size_t;
+
 typedef char int8;
 typedef short int16;
 typedef int int32;
