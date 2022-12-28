@@ -27,7 +27,7 @@ $(BUILD)/kernel/%.o: $(SRC)/kernel/%.c
 	$(shell mkdir -p $(dir $@))
 	gcc $(CFLAGS) $(DEBUG) $(INCLUDE) -c $< -o $@
 
-$(BUILD)/kernel.bin: $(BUILD)/kernel/start.o $(BUILD)/kernel/main.o
+$(BUILD)/kernel.bin: $(BUILD)/kernel/start.o $(BUILD)/kernel/main.o $(BUILD)/kernel/io.o
 	$(shell mkdir -p $(dir $@))
 	ld -m elf_i386 -static $^ -o $@ -Ttext $(ENTRYPOINT)
 
@@ -54,3 +54,18 @@ bochs: $(BUILD)/master.img
 .PHONY: bochsg
 bochsg: $(BUILD)/master.img
 	bochs-gdb -q -f ../bochs/bochsrc.gdb
+
+.PHONY: qemu
+qemu: $(BUILD)/master.img
+	qemu-system-i386 \
+	-m 32M \
+	-boot c \
+	-hda $<
+
+.PHONY: qemug
+qemug: $(BUILD)/master.img
+	qemu-system-i386 \
+	-s -S \
+	-m 32M \
+	-boot c \
+	-hda $<

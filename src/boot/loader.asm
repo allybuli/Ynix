@@ -27,7 +27,6 @@ detect_memory:
 
     mov si, detecting
     call print
-    xchg bx, bx
     jmp prepare_protected_mode
 
 prepare_protected_mode:
@@ -70,7 +69,6 @@ error:
 
 [bits 32]
 protect_mode:
-    ; xchg bx, bx
     mov ax, data_selector
     mov ds, ax
     mov es, ax
@@ -85,7 +83,6 @@ protect_mode:
     mov bl, 200 ;连续读取的扇区数量
 
     call read_disk
-    xchg bx, bx
     jmp dword code_selector: 0x10000
 
     ud2;执行这行会出错    

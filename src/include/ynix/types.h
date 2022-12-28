@@ -2,7 +2,8 @@
 #define YNIX_TYPES_H
 
 #define EOF -1
-#define NULL 0
+#define NULL ((void*)0)
+#define EOS '\0'
 
 #define bool _Bool
 #define true 1

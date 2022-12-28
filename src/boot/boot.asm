@@ -16,7 +16,6 @@ mov edi, 0x1000
 mov ecx, 2
 mov bl, 4
 
-xchg bx, bx
 call read_disk
 
 cmp word [0x1000], 0x55aa

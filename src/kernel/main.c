@@ -1,13 +1,23 @@
 #include "../include/ynix/ynix.h"
+#include "../include/ynix/io.h"
+#include "../include/ynix/types.h"
 
-int magic = YNIX_MAGIC;
-char buffer[1024];
+#define CRT_ADDR_REG 0x3d4
+#define CRT_DATA_REG 0x3d5
 
+#define CRT_CURSOR_H 0xe
+#define CRT_CURSOR_L 0xf
 
 void kernel_init() {
-    char* video = (char*) 0xb8000;
-    char message[] = "Hello Ynix!!!!";
-    for(int i = 0; i < sizeof(message); i++) {
-        video[2 * i] = message[i];
-    }
+    outb(CRT_ADDR_REG, CRT_CURSOR_H);
+    u16 pos = inb(CRT_DATA_REG) << 8;
+    outb(CRT_ADDR_REG, CRT_CURSOR_L);
+    pos |= inb(CRT_DATA_REG);
+
+    outb(CRT_ADDR_REG, CRT_CURSOR_H);
+    outb(CRT_DATA_REG, 0);
+    outb(CRT_ADDR_REG, CRT_CURSOR_L);
+    outb(CRT_DATA_REG, 100);
+
+    return;
 }
