@@ -64,7 +64,8 @@ read_disk:
         call .waits
         call .reads
         pop cx
-        ret
+        loop .read 
+    ret
 
 .waits:
     mov dx, 0x1f7
@@ -93,14 +94,14 @@ read_disk:
 
 print:
     mov ah, 0x0e
-    .next:
-        mov al, [si]
-        cmp al, 0
-        jz .done
-        int 0x10
-        inc si
-        jmp .next
-    .done:
+.next:
+    mov al, [si]
+    cmp al, 0
+    jz .done
+    int 0x10
+    inc si
+    jmp .next
+.done:
     ret
 
 booting:

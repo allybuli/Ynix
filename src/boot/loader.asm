@@ -12,18 +12,18 @@ detect_memory:
     mov edi, ards_buffer
     mov edx, 0x534d4150
 
-    .next:
-        mov eax, 0xe820
-        mov ecx, 20
-        int 0x15
+.next:
+    mov eax, 0xe820
+    mov ecx, 20
+    int 0x15
 
-        jc error
+    jc error
 
-        add di, cx
-        inc word [ards_count]
-        
-        cmp ebx, 0
-        jnz .next
+    add di, cx
+    inc word [ards_count]
+    
+    cmp ebx, 0
+    jnz .next
 
     mov si, detecting
     call print
@@ -45,14 +45,14 @@ prepare_protected_mode:
 
 print:
     mov ah, 0x0e
-    .next:
-        mov al, [si]
-        cmp al, 0
-        jz .done
-        int 0x10
-        inc si
-        jmp .next
-    .done:
+.next:
+    mov al, [si]
+    cmp al, 0
+    jz .done
+    int 0x10
+    inc si
+    jmp .next
+.done:
     ret
 
 loading:
@@ -128,7 +128,8 @@ read_disk:
         call .waits
         call .reads
         pop cx
-        ret
+        loop .read
+    ret
 
 .waits:
     mov dx, 0x1f7
