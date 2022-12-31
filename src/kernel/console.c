@@ -1,6 +1,7 @@
 #include "../include/ynix/console.h"
 #include "../include/ynix/types.h"
 #include "../include/ynix/string.h"
+#include "../include/ynix/io.h"
 
 #define CRT_ADDR_REG 0x3D4 // CRT(6845)索引寄存器
 #define CRT_DATA_REG 0x3D5 // CRT(6845)数据寄存器
@@ -33,7 +34,7 @@ static u32 screen; // 当前显示器开始的内存位置
 
 static u32 pos; // 记录当前光标的内存位置
 
-static x, y; // 当前光标的坐标
+static u32 x, y; // 当前光标的坐标
 
 static u8 attr = 7;        // 字符样式
 static u16 erase = 0x0720; // 空格
