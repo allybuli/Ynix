@@ -83,7 +83,7 @@ void console_clear() {
     y = 0;
     set_cursor();
     set_screen();
-    for(u16* ptr = (u16*)MEM_BASE; ptr < MEM_END; ptr ++) {
+    for(u16* ptr = (u16*)MEM_BASE; ptr < (u16*)MEM_END; ptr ++) {
         *ptr = erase;
     }
 }
@@ -98,7 +98,7 @@ static void scroll_up() {
         screen += ROW_SIZE;
         pos += ROW_SIZE;
     } else {
-        memcpy(MEM_BASE, screen, SCR_SIZE);
+        memcpy((void*)MEM_BASE, (void*)screen, SCR_SIZE);
         pos -= (screen - MEM_BASE);
         screen = MEM_BASE;
     }
