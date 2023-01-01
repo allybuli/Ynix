@@ -1,6 +1,7 @@
 #include "../include/ynix/printk.h"
 #include "../include/ynix/stdarg.h"
 #include "../include/ynix/stdio.h"
+#include "../include/ynix/console.h"
 
 static char buf[1024];
 
