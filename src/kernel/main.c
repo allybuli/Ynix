@@ -6,13 +6,14 @@
 #include "../include/ynix/stdarg.h"
 #include "../include/ynix/printk.h"
 #include "../include/ynix/assert.h"
+#include "../include/ynix/debug.h"
 
 void kernel_init()
 {
     console_init();
     
-    assert(1 > 0);
-    assert(0 > 1);
+    BMB;
+    DEBUGK("debug!!!\n");
 
     return;
 }
