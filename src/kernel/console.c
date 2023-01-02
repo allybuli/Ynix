@@ -133,7 +133,6 @@ static void command_lf() {
 }
 
 void console_write(char* buf, u32 count) {
-    char* ptr = (char*) pos;
     for(u32 i = 0; i < count; i++) {
         switch(buf[i]) {
             case ASCII_NUL:
@@ -167,9 +166,10 @@ void console_write(char* buf, u32 count) {
                     pos -= ROW_SIZE;
                     command_lf();
                 }
-                *ptr ++ = buf[i];
-                *ptr ++ = attr;
-                pos += 2;
+                *((char*)pos) = buf[i];
+                pos ++;
+                *((char*)pos) = attr;
+                pos ++;
                 x ++;
                 break;
         }
