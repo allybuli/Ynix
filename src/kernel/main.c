@@ -7,13 +7,12 @@
 #include "../include/ynix/printk.h"
 #include "../include/ynix/assert.h"
 #include "../include/ynix/debug.h"
+#include "../include/ynix/global.h"
 
 void kernel_init()
 {
     console_init();
-    
-    BMB;
-    DEBUGK("debug!!!\n");
+    gdt_init();
 
     return;
 }
