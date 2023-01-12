@@ -5,6 +5,7 @@
 
 #include "../include/ynix/stdio.h"
 #include "../include/ynix/string.h"
+#include "../include/ynix/assert.h"
 
 #define ZEROPAD 1  // 填充零
 #define SIGN 2     // unsigned/signed long
@@ -257,7 +258,9 @@ int vsprintf(char* buf, const char* fmt, va_list args) {
         }
     }
     *str = '\0';
-    return str - buf;
+    i = str - buf;
+    assert(i < 1024);
+    return i;
 }
 
 // 结果按格式输出字符串到 buf
