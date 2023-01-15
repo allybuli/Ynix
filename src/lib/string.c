@@ -106,7 +106,7 @@ void *memset(void *dest, int ch, size_t count) {
 void *memcpy(void *dest, const void *src, size_t count) {
     char* ptr = (char*)dest;
     while(count --) {
-        *ptr ++ = *((char*)src);
+        *ptr ++ = *((char*)(src++));
     }
     return dest;
 }
