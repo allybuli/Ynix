@@ -8,11 +8,13 @@
 #include "../include/ynix/assert.h"
 #include "../include/ynix/debug.h"
 #include "../include/ynix/global.h"
+#include "../include/ynix/interrupt.h"
 
 void kernel_init()
 {
     console_init();
     gdt_init();
-    task_init();
+    // task_init();
+    interrupt_init();
     return;
 }
