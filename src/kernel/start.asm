@@ -6,6 +6,8 @@ global _start
 _start:
     call kernel_init
     xchg bx, bx
-    int 0x80
+    ; int 0x80
+    mov bx, 0
+    div bx
     xchg bx, bx
     jmp $
