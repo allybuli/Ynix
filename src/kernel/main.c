@@ -9,6 +9,7 @@
 #include "../include/ynix/debug.h"
 #include "../include/ynix/global.h"
 #include "../include/ynix/interrupt.h"
+#include "../include/ynix/stdlib.h"
 
 void kernel_init()
 {
@@ -16,5 +17,12 @@ void kernel_init()
     gdt_init();
     // task_init();
     interrupt_init();
+
+    asm volatile("sti"); // 开中断，会不断触发时钟中断
+    u32 counter = 0;
+    while(true) {
+        DEBUGK("looping in kernel init %d...\n", counter++);
+        delay(100000000);
+    }
     return;
 }
