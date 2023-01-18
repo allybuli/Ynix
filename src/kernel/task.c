@@ -1,6 +1,7 @@
 #include "../include/ynix/task.h"
 #include "../include/ynix/printk.h"
 #include "../include/ynix/debug.h"
+#include "../include/ynix/stdlib.h"
 
 #define STACK_SIZE 0x1000
 
@@ -23,17 +24,19 @@ void schedule() {
     task_switch(next);
 }
 
-u32 thread_a() {
+u32 _ofp thread_a() {
+    asm volatile("sti");
     while(true) {
         printk("A");
-        schedule();
+        delay(100000);
     }
 }
 
 u32 thread_b() {
+    asm volatile("sti");
     while(true) {
         printk("B");
-        schedule();
+        delay(100000);
     }
 }
 
