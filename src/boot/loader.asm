@@ -20,7 +20,7 @@ detect_memory:
     jc error
 
     add di, cx
-    inc word [ards_count]
+    inc dword [ards_count]
     
     cmp ebx, 0
     jnz .next
@@ -83,6 +83,8 @@ protect_mode:
     mov bl, 200 ;连续读取的扇区数量
 
     call read_disk
+    mov eax, 20221225
+    mov ebx, ards_count
     jmp dword code_selector: 0x10000
 
     ud2;执行这行会出错    
@@ -185,5 +187,5 @@ gdt_end:
 
 
 ards_count:
-    dw 0
+    dd 0
 ards_buffer:
