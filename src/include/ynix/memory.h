@@ -7,4 +7,6 @@
 // 可用内存起始位置：1M
 #define MEMORY_BASE 0x100000
 
+void memory_test();
+
 #endif

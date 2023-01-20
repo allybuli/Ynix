@@ -11,15 +11,19 @@
 #include "../include/ynix/interrupt.h"
 #include "../include/ynix/stdlib.h"
 #include "../include/ynix/task.h"
+#include "../include/ynix/memory.h"
 
 void kernel_init()
 {
-    console_init();
+    // console_init();
     gdt_init();
     interrupt_init();
-    task_init();
 
-    // asm volatile("sti"); // 开中断，会不断触发时钟中断
+    memory_test();
+    // task_init();
+    
+    asm volatile("sti"); // 开中断，会不断触发时钟中断
+    hang();
     // u32 counter = 0;
     // while(true) {
     //     DEBUGK("looping in kernel init %d...\n", counter++);
