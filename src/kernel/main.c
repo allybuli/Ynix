@@ -19,15 +19,15 @@ void kernel_init()
     gdt_init();
     interrupt_init();
 
-    memory_test();
+    // memory_test();
     // task_init();
     
-    asm volatile("sti"); // 开中断，会不断触发时钟中断
+    // BMB;
+
+    char *ptr = (char *)(0x100000 * 20);
+    ptr[0] = 'a';
+
+    // asm volatile("sti"); // 开中断，会不断触发时钟中断
     hang();
-    // u32 counter = 0;
-    // while(true) {
-    //     DEBUGK("looping in kernel init %d...\n", counter++);
-    //     delay(100000000);
-    // }
     return;
 }

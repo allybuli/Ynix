@@ -115,11 +115,6 @@ static void put_page(u32 addr) {
     LOGK("Put page 0x%p\n", addr);
 }
 
-void memory_init(u32 magic, u32 addr) {
-    memory_page_init(magic, addr);
-    memory_map_init();
-}
-
 void memory_test() {
     u32 pages[10];
     for(size_t i = 0; i < 10; i++) {
@@ -128,4 +123,60 @@ void memory_test() {
     for(size_t i = 0; i < 10; i++) {
         put_page(pages[i]);
     }
+}
+
+u32 get_cr3() {
+    asm volatile("movl %cr3, %eax");
+}
+
+void set_cr3(u32 pde) {
+    ASSERT_PAGE(pde);
+    asm volatile(
+        "movl %%eax, %%cr3\n"
+        ::"a"(pde)
+    );
+}
+
+static void enable_page() {
+    asm volatile(
+        "movl %cr0, %eax\n"
+        "orl $0x80000000, %eax\n"
+        "movl %eax, %cr0\n"
+    );
+}
+
+static void entry_init(page_entry_t* entry, u32 index) {
+    *(u32*)entry = 0;
+    entry->present = 1;
+    entry->write = 1;
+    entry->user = 1;
+    entry->index = index;
+}
+
+#define KERNEL_PAGE_DIR 0x200000
+#define KERNEL_PAGE_ENTRY 0x201000
+
+void mapping_init() {
+    // 页目录
+    page_entry_t* pde = (page_entry_t*)KERNEL_PAGE_DIR;
+    memset(pde, 0, PAGE_SIZE);
+    entry_init(&pde[0], IDX(KERNEL_PAGE_ENTRY));
+
+    page_entry_t* pte = (page_entry_t*)KERNEL_PAGE_ENTRY;
+    memset(pte, 0, PAGE_SIZE);
+
+    for(size_t i = 0; i < 1024; i++) {
+        entry_init(&pte[i], i);
+        memory_map[i] = 1;
+    }
+
+    set_cr3((u32)pde);
+
+    enable_page();
+}
+
+void memory_init(u32 magic, u32 addr) {
+    memory_page_init(magic, addr);
+    memory_map_init();
+    mapping_init();
 }
