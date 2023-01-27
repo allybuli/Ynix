@@ -3,12 +3,6 @@
 
 #include "types.h"
 
-// 一页的大小：4K
-#define PAGE_SIZE 0x1000
-
-// 可用内存起始位置：1M
-#define MEMORY_BASE 0x100000
-
 typedef struct page_entry_t {
     u8 present : 1; // 是否在内存中
     u8 write : 1;   // 0只读，1可读可写
@@ -22,6 +16,15 @@ typedef struct page_entry_t {
     u8 ignored : 3; // 未使用，保留
     u32 index : 20; // 页索引
 } _packed page_entry_t;
+
+// 一页的大小：4K
+#define PAGE_SIZE 0x1000
+// 一页内存里的页表项个数
+#define ENTRY_SIZE (PAGE_SIZE / sizeof(page_entry_t))
+
+// 可用内存起始位置：1M
+#define MEMORY_BASE 0x100000
+
 
 u32 get_cr3();
 void set_cr3(u32 pde);

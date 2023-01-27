@@ -19,13 +19,13 @@ void kernel_init()
     gdt_init();
     interrupt_init();
 
-    // memory_test();
+    BMB;
+    memory_test();
     // task_init();
     
     // BMB;
 
-    char *ptr = (char *)(0x100000 * 20);
-    ptr[0] = 'a';
+
 
     // asm volatile("sti"); // 开中断，会不断触发时钟中断
     hang();
