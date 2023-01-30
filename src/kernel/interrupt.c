@@ -64,9 +64,36 @@ void send_eoi(int vector) {
 
 extern void schedule();
 
+bool interrupt_disable() {
+    asm volatile(
+        "pushfl\n" // 压入eflags
+        "cli\n"    // 屏蔽外中断
+        "popl %eax\n" // 将刚压入的eflags弹出到eax
+        "shrl $9, %eax\n" 
+        "andl $1, %eax\n" // 得到屏蔽中断前eflags中的IF位
+    );
+}
+
+bool get_interrupt_state() {
+    asm volatile(
+        "pushfl\n"
+        "popl %eax\n"
+        "shrl $9, %eax\n"
+        "andl $1, %eax\n"
+    );
+}
+
+void set_interrupt_state(bool state) {
+    if(state) {
+        asm volatile("sti");
+    } else {
+        asm volatile("cli");
+    }
+}
+
 void default_handler(int vector) {
     send_eoi(vector);
-    schedule();
+    DEBUGK("[%x] default interrupt called...\n", vector);
 }
 
 void exception_handler(
@@ -136,6 +163,7 @@ void idt_init() {
     idt_ptr.limit = sizeof(idt) - 1;
     asm volatile("lidt idt_ptr\n");
 }
+
 
 void interrupt_init() {
     pic_init();

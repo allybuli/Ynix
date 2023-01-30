@@ -20,4 +20,8 @@ typedef void* handler_t; // 中断处理函数
 
 void interrupt_init();
 
+bool interrupt_disable();
+bool get_interrupt_state();
+void set_interrupt_state(bool state);
+
 #endif
