@@ -29,6 +29,9 @@ typedef struct page_entry_t {
 u32 get_cr3();
 void set_cr3(u32 pde);
 
+u32 alloc_kpage(u32 count);
+void free_kpage(u32 addr, u32 count);
+
 void memory_test();
 
 #endif

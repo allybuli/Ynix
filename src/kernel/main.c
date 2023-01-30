@@ -12,6 +12,7 @@
 #include "../include/ynix/stdlib.h"
 #include "../include/ynix/task.h"
 #include "../include/ynix/memory.h"
+#include "../include/ynix/bitmap.h"
 
 void kernel_init()
 {
@@ -20,6 +21,7 @@ void kernel_init()
     interrupt_init();
 
     BMB;
+    // bitmap_tests();
     memory_test();
     // task_init();
     

@@ -5,6 +5,7 @@
 #include "../include/ynix/assert.h"
 #include "../include/ynix/stdlib.h"
 #include "../include/ynix/string.h"
+#include "../include/ynix/bitmap.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -18,6 +19,7 @@
 #define DIDX(addr) (((u32)addr >> 22) & 0x3ff)
 // 获取 addr 的页表索引
 #define TIDX(addr) (((u32)addr >> 12) & 0x3ff)
+#define PAGE(idx) ((u32)idx << 12)
 #define ASSERT_PAGE(addr) assert((addr & 0xfff) == 0)
 
 // 内核页目录索引
@@ -28,8 +30,12 @@ static u32 KERNEL_PAGE_TABLE[] = {
     0x3000,
 };
 
+#define KERNEL_MAP_BITS 0x4000
+
 // 内核大小：8M
 #define KERNEL_MEMORY_SIZE (sizeof(KERNEL_PAGE_TABLE) * 0x100000)
+
+bitmap_t kernel_map;
 
 // 内存区域
 typedef struct ards_t {
@@ -104,6 +110,10 @@ void memory_map_init() {
     }
 
     LOGK("Total pages %d, free pages %d\n", total_pages, free_pages);
+
+    u32 length = (IDX(KERNEL_MEMORY_SIZE) - IDX(MEMORY_BASE)) / 8;
+    bitmap_init(&kernel_map, (char*)KERNEL_MAP_BITS, length, IDX(MEMORY_BASE));
+    bitmap_scan(&kernel_map, memory_map_pages);
 }
 
 static u32 get_page() {
@@ -233,32 +243,50 @@ void memory_init(u32 magic, u32 addr) {
     mapping_init();
 }
 
+static u32 scan_page(bitmap_t* map, u32 count) {
+    assert(count > 0);
+    int32 index = bitmap_scan(map, count);
+    if(EOF == index) {
+        panic("Scan page fail!!!");
+    }
+
+    u32 addr = PAGE(index);
+    LOGK("Scan page 0x%p count %d\n", addr, count);
+    return addr;
+}
+
+static void reset_page(bitmap_t* map, u32 addr, u32 count) {
+    ASSERT_PAGE(addr);
+    assert(count > 0);
+    u32 index = IDX(addr);
+    for(size_t i = 0; i < count; i++) {
+        assert(bitmap_test(map, index + i));
+        bitmap_set(map, index + i, false);
+    }
+}
+
+u32 alloc_kpage(u32 count) {
+    assert(count > 0);
+    u32 addr = scan_page(&kernel_map, count);
+    LOGK("Alloc kernel pages 0x%p count %d\n", addr, count);
+    return addr;
+}
+
+void free_kpage(u32 addr, u32 count) {
+    ASSERT_PAGE(addr);
+    assert(count > 0);
+    reset_page(&kernel_map, addr, count);
+    LOGK("Free kernel pages 0x%p count %d\n", addr, count);
+}
+
 void memory_test() {
-    BMB;
-    // 将 20 M 0x1400000（物理内存）内存
-    // 映射到 64M 0x4000000（虚拟内存）的位置
-    // 我们还需要一个页表，0x900000
-    u32 vaddr = 0x4000000;
-    u32 paddr = 0x1400000;
-    u32 table = 0x900000;
-    
-    page_entry_t* pde = get_pde();
-    page_entry_t* entry = &pde[DIDX(vaddr)];
-    entry_init(entry, IDX(table));
-
-    page_entry_t* pte = get_pte(vaddr);
-    page_entry_t* tentry = &pte[TIDX(vaddr)];
-    entry_init(tentry, IDX(paddr));
-
-    BMB;
-    char* ptr = (char*)(vaddr);
-    ptr[0] = 'a';
-
-    BMB;
-    entry_init(tentry, IDX(0x1500000));
-    flush_tlb(vaddr);
-
-    BMB;
-    ptr[2] = 'b';
-    BMB;
+    u32* page = (u32*)(0x200000);
+    u32 count = 0x6ff;
+    for(size_t i = 0; i < count; i++) {
+        page[i] = alloc_kpage(1);
+        LOGK("0x%x\n", i);
+    }
+    for(size_t i = 0; i < count; i++) {
+        free_kpage(page[i], 1);
+    }
 }
