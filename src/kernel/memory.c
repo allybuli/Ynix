@@ -214,11 +214,8 @@ void mapping_init() {
     // 3、页内偏移为0，也就是页目录这一页的开始位置
 
     // 两页内核页表的映射也是如此，虚拟地址0xffc00000就是页表的开始位置
-    BMB;
     set_cr3((u32)pde);
-    BMB;
     enable_page();
-    BMB;
 }
 
 static page_entry_t* get_pde() {
