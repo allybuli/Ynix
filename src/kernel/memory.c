@@ -92,7 +92,7 @@ static u32 start_page = 0;
 static u8* memory_map;
 static u32 memory_map_pages;
 
-// 位图管理内存
+// 位图管理整个系统的内存
 void memory_map_init() {
     memory_map = (u8*)memory_base;
 
