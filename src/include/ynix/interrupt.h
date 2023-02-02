@@ -5,6 +5,9 @@
 
 #define IDT_SIZE 256
 
+#define IRQ_MASTER_NR 0x20 // 主片起始向量号
+#define IRQ_SLAVE_NR 0x28  // 从片起始向量号
+
 typedef struct gate_t {
     u16 offset0;
     u16 selector;
@@ -19,6 +22,10 @@ typedef struct gate_t {
 typedef void* handler_t; // 中断处理函数
 
 void interrupt_init();
+
+// 设置中断处理函数
+void set_interrupt_handler(u32 irq, handler_t handler);
+void set_interrupt_mask(u32 irq, bool enable);
 
 bool interrupt_disable();
 bool get_interrupt_state();

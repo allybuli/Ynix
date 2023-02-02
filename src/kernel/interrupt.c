@@ -4,6 +4,7 @@
 #include "../include/ynix/printk.h"
 #include "../include/ynix/io.h"
 #include "../include/ynix/stdlib.h"
+#include "../include/ynix/assert.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 // #define LOGK(fmt, arg...)
@@ -62,7 +63,26 @@ void send_eoi(int vector) {
     }
 }
 
-extern void schedule();
+void set_interrupt_handler(u32 irq, handler_t handler) {
+    assert(irq >= 0 && irq < 16);
+    handler_table[IRQ_MASTER_NR + irq] = handler;
+}
+
+void set_interrupt_mask(u32 irq, bool enable) {
+    assert(irq >= 0 && irq < 16);
+    u16 port = 0;
+    if(irq < 8) {
+        port = PIC_M_DATA;
+    } else {
+        port = PIC_S_DATA;
+        irq -= 8;
+    }
+    if(enable) {
+        outb(port, inb(port) & ~(1 << irq));
+    } else {
+        outb(port, inb(port) | (1 << irq));
+    }
+}
 
 bool interrupt_disable() {
     asm volatile(
