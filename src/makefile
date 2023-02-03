@@ -36,6 +36,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/assert.o \
 	$(BUILD)/kernel/debug.o \
 	$(BUILD)/kernel/global.o \
+	$(BUILD)/kernel/clock.o \
 	$(BUILD)/kernel/task.o \
 	$(BUILD)/kernel/schedule.o \
 	$(BUILD)/kernel/interrupt.o \
