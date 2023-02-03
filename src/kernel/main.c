@@ -28,23 +28,8 @@ void kernel_init()
     // console_init();
     gdt_init();
     interrupt_init();
+    // clock_init();
 
-    bool intr = interrupt_disable();
-    set_interrupt_state(true);
-
-    LOGK("%d\n", intr);
-    LOGK("%d\n", get_interrupt_state());
-
-    BMB;
-
-    intr = interrupt_disable();
-
-    BMB;
-    set_interrupt_state(true);
-
-    LOGK("%d\n", intr);
-    LOGK("%d\n", get_interrupt_state());
-    // asm volatile("sti"); // 开中断，会不断触发时钟中断
     hang();
     return;
 }
