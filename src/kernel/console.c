@@ -2,6 +2,7 @@
 #include "../include/ynix/types.h"
 #include "../include/ynix/string.h"
 #include "../include/ynix/io.h"
+#include "../include/ynix/interrupt.h"
 
 #define CRT_ADDR_REG 0x3D4 // CRT(6845)索引寄存器
 #define CRT_DATA_REG 0x3D5 // CRT(6845)数据寄存器
@@ -133,6 +134,7 @@ static void command_lf() {
 }
 
 void console_write(char* buf, u32 count) {
+    bool intr = interrupt_disable();
     for(u32 i = 0; i < count; i++) {
         switch(buf[i]) {
             case ASCII_NUL:
@@ -175,6 +177,7 @@ void console_write(char* buf, u32 count) {
         }
     }
     set_cursor();
+    set_interrupt_state(intr);
 }
 
 void console_init() {
