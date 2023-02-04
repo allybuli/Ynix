@@ -14,6 +14,7 @@
 #include "../include/ynix/memory.h"
 #include "../include/ynix/bitmap.h"
 #include "../include/ynix/debug.h"
+#include "../include/ynix/clock.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -23,13 +24,12 @@ void intr_test() {
     set_interrupt_state(intr);
 }
 
-void kernel_init()
-{
-    // console_init();
-    gdt_init();
+void kernel_init() {
+    // gdt_init();
     interrupt_init();
-    // clock_init();
-
+    clock_init();
+    BMB;
+    asm volatile("sti");
     hang();
     return;
 }

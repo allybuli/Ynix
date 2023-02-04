@@ -188,4 +188,5 @@ void idt_init() {
 void interrupt_init() {
     pic_init();
     idt_init();
+    DEBUGK("interrupt_init!!!\n");
 }

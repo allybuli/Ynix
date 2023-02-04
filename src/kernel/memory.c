@@ -236,6 +236,7 @@ void memory_init(u32 magic, u32 addr) {
     memory_page_init(magic, addr);
     memory_map_init();
     mapping_init();
+    DEBUGK("memory_init!!!\n");
 }
 
 static u32 scan_page(bitmap_t* map, u32 count) {
