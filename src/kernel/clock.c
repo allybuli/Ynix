@@ -22,7 +22,16 @@ void clock_handler(int vector) {
     send_eoi(vector);
 
     jiffies++;
-    if(jiffies % 1000 == 0) DEBUGK("clock jiffies %d ...\n", jiffies);
+    // if(jiffies % 1000 == 0) DEBUGK("clock jiffies %d ...\n", jiffies);
+
+    task_t *task = running_task();
+    assert(task->magic == YNIX_MAGIC);
+    task->jiffies = jiffies;
+    task->ticks--;
+    if (!task->ticks) {
+        task->ticks = task->priority;
+        schedule();
+    }
 }
 
 // 计数器初始化，通过计数器0可以控制时钟信号的频率，进而控制一个时间片的长短

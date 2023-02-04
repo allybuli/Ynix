@@ -28,7 +28,7 @@ void kernel_init() {
     // gdt_init();
     interrupt_init();
     clock_init();
-    BMB;
+    task_init();
     asm volatile("sti");
     hang();
     return;
