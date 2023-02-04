@@ -8,6 +8,7 @@
 #include "../include/ynix/bitmap.h"
 #include "../include/ynix/string.h"
 #include "../include/ynix/assert.h"
+#include "../include/ynix/syscall.h"
 
 extern bitmap_t kernel_map;
 extern void task_switch(task_t* next);
@@ -49,7 +50,12 @@ task_t* running_task() {
     );
 }
 
+void task_yield() {
+    schedule();
+}
+
 void schedule() {
+    assert(!get_interrupt_state());
     task_t *cur = running_task();
     task_t *next = task_search(TASK_READY);
 
@@ -71,23 +77,26 @@ void schedule() {
 }
 
 u32 thread_a() {
-    asm volatile("sti");
+    set_interrupt_state(true);
     while(true) {
         printk("A");
+        yield();
     }
 }
 
 u32 thread_b() {
-    asm volatile("sti");
+    set_interrupt_state(true);
     while(true) {
         printk("B");
+        yield();
     }
 }
 
 u32 thread_c() {
-    asm volatile("sti");
+    set_interrupt_state(true);
     while(true) {
         printk("C");
+        yield();
     }
 }
 

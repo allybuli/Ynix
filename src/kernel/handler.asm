@@ -7,7 +7,6 @@ section .text
 
 %macro INTERRUPT_HANDLER 2
 interrupt_handler_%1:
-    ; xchg bx, bx
 %ifn %2
     push 0x20222202
 %endif
@@ -164,7 +163,7 @@ extern syscall_check
 extern syscall_table
 global syscall_handler
 syscall_handler:
-    xchg bx, bx
+    ; xchg bx, bx
     push eax
     call syscall_check
     add esp, 4
@@ -180,7 +179,7 @@ syscall_handler:
     pusha
 
     push 0x80
-    xchg bx, bx
+    ; xchg bx, bx
 
     push edx;第三个参数
     push ecx;第二个参数
@@ -188,7 +187,7 @@ syscall_handler:
 
     call [syscall_table + eax * 4]
 
-    xchg bx, bx
+    ; xchg bx, bx
     add esp, 12;系统调用结束恢复栈
 
     ;设置系统调用返回值

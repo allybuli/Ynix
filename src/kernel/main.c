@@ -30,5 +30,6 @@ void kernel_init() {
     task_init();
     syscall_init();
 
+    set_interrupt_state(true);
     return;
 }

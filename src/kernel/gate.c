@@ -2,6 +2,7 @@
 #include "../include/ynix/interrupt.h"
 #include "../include/ynix/debug.h"
 #include "../include/ynix/assert.h"
+#include "../include/ynix/syscall.h"
 
 #define SYSCALL_SIZE 64
 handler_t syscall_table[SYSCALL_SIZE];
@@ -23,6 +24,8 @@ static u32 sys_test() {
     return 255;
 }
 
+extern void task_yield();
+
 void syscall_init() {
     gate_t* gate = &idt[0x80];
     gate->offset0 = (u32)syscall_handler & 0xffff;
@@ -37,5 +40,6 @@ void syscall_init() {
     for(size_t i = 0; i < SYSCALL_SIZE; i++) {
         syscall_table[i] = sys_default;
     }
-    syscall_table[0] = sys_test;
+    syscall_table[SYS_NR_TEST] = sys_test;
+    syscall_table[SYS_NR_YIELD] = task_yield;
 }
