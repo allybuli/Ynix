@@ -25,6 +25,8 @@ typedef struct page_entry_t {
 // 可用内存起始位置：1M
 #define MEMORY_BASE 0x100000
 
+// 内核页目录索引
+#define KERNEL_PAGE_DIR 0x1000
 
 u32 get_cr3();
 void set_cr3(u32 pde);
