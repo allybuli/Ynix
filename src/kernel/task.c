@@ -56,11 +56,14 @@ void schedule() {
     assert(next != NULL);
     assert(next->magic == YNIX_MAGIC);
 
-    if (cur->state == TASK_RUNNING) {
+    if(cur->state == TASK_RUNNING) {
         cur->state = TASK_READY;
     }
+    if(!cur->ticks) {
+        cur->ticks = cur->priority;
+    }
     next->state = TASK_RUNNING;
-    if (next == cur) {
+    if(next == cur) {
         return;
     }
 
