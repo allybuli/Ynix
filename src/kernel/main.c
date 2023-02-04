@@ -25,11 +25,10 @@ void intr_test() {
 }
 
 void kernel_init() {
-    // gdt_init();
     interrupt_init();
     clock_init();
     task_init();
-    asm volatile("sti");
-    hang();
+    syscall_init();
+
     return;
 }
