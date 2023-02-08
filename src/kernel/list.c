@@ -1,4 +1,5 @@
 #include "../include/ynix/list.h"
+#include "../include/ynix/assert.h"
 
 void list_init(list_t* list) {
     list->head.prev = NULL;
