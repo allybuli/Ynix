@@ -17,6 +17,7 @@ extern void task_switch(task_t* next);
 #define NR_TASKS 64
 static task_t *task_table[NR_TASKS];
 static list_t block_list; // 任务默认阻塞链表
+static task_t* idle_task; // 基础任务
 
 static task_t *get_free_task() {
     for (size_t i = 0; i < NR_TASKS; i++) {
@@ -40,6 +41,10 @@ static task_t* task_search(task_state_t state) {
         if(NULL == next || task->ticks > next->ticks || task->jiffies < next->jiffies) {
             next = task;
         }
+    }
+    if(NULL == next && TASK_READY == state) {
+        // 系统无可调度的任务，启动基础任务
+        next = idle_task;
     }
     return next;
 }
@@ -166,11 +171,13 @@ static void task_setup() {
     memset(task_table, 0, sizeof(task_table));
 }
 
+extern u32 idle_thread();
+extern u32 init_thread();
+
 void task_init() {
-    DEBUGK("init task!!!\n");
     list_init(&block_list);
     task_setup();
-    task_create(thread_a, "a", 5, KERNEL_USER);
-    task_create(thread_b, "b", 5, KERNEL_USER);
-    task_create(thread_c, "c", 5, KERNEL_USER);
+
+    task_create(idle_thread, "idle", 1, KERNEL_USER);
+    task_create(init_thread, "init", 5, NORMAL_USER);
 }

@@ -45,6 +45,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/gate.o \
 	$(BUILD)/kernel/syscall.o \
 	$(BUILD)/kernel/list.o \
+	$(BUILD)/kernel/thread.o \
 	$(BUILD)/lib/string.o \
 	$(BUILD)/lib/vsprintf.o \
 	$(BUILD)/lib/stdlib.o \
