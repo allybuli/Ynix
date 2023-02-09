@@ -178,6 +178,6 @@ void task_init() {
     list_init(&block_list);
     task_setup();
 
-    task_create(idle_thread, "idle", 1, KERNEL_USER);
+    idle_task = task_create(idle_thread, "idle", 1, KERNEL_USER);
     task_create(init_thread, "init", 5, NORMAL_USER);
 }
