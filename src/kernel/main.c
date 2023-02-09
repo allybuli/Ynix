@@ -15,14 +15,9 @@
 #include "../include/ynix/bitmap.h"
 #include "../include/ynix/debug.h"
 #include "../include/ynix/clock.h"
+#include "../include/ynix/syscall.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
-
-void intr_test() {
-    bool intr = interrupt_disable();
-    // do someing
-    set_interrupt_state(intr);
-}
 
 void kernel_init() {
     interrupt_init();

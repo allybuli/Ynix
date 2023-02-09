@@ -9,12 +9,14 @@
 #include "../include/ynix/string.h"
 #include "../include/ynix/assert.h"
 #include "../include/ynix/syscall.h"
+#include "../include/ynix/list.h"
 
 extern bitmap_t kernel_map;
 extern void task_switch(task_t* next);
 
 #define NR_TASKS 64
 static task_t *task_table[NR_TASKS];
+static list_t block_list; // 任务默认阻塞链表
 
 static task_t *get_free_task() {
     for (size_t i = 0; i < NR_TASKS; i++) {
@@ -54,6 +56,32 @@ void task_yield() {
     schedule();
 }
 
+void task_block(task_t* task, list_t* blist, task_state_t state) {
+    assert(!get_interrupt_state());
+    assert(NULL == task->node.prev);
+    assert(NULL == task->node.next);
+    if(NULL == blist) {
+        blist = &block_list;
+    }
+    list_push(blist, &task->node);
+
+    assert(state != TASK_READY && state != TASK_RUNNING);
+    task->state = state;
+    task_t* cur = running_task();
+    if(cur == task) {
+        schedule();
+    }
+}
+
+void task_unblock(task_t* task) {
+    assert(!get_interrupt_state());
+    list_remove(&task->node);
+
+    assert(NULL == task->node.prev);
+    assert(NULL == task->node.next);
+    task->state = TASK_READY;
+}
+
 void schedule() {
     assert(!get_interrupt_state());
     task_t *cur = running_task();
@@ -80,7 +108,7 @@ u32 thread_a() {
     set_interrupt_state(true);
     while(true) {
         printk("A");
-        yield();
+        test();
     }
 }
 
@@ -88,7 +116,7 @@ u32 thread_b() {
     set_interrupt_state(true);
     while(true) {
         printk("B");
-        yield();
+        test();
     }
 }
 
@@ -96,7 +124,7 @@ u32 thread_c() {
     set_interrupt_state(true);
     while(true) {
         printk("C");
-        yield();
+        test();
     }
 }
 
@@ -133,13 +161,14 @@ static task_t *task_create(target_t target, const char *name, u32 priority, u32 
 static void task_setup() {
     task_t* task = running_task();
     task->magic = YNIX_MAGIC;
-    task->ticks = 10;
+    task->ticks = 1;
 
     memset(task_table, 0, sizeof(task_table));
 }
 
 void task_init() {
     DEBUGK("init task!!!\n");
+    list_init(&block_list);
     task_setup();
     task_create(thread_a, "a", 5, KERNEL_USER);
     task_create(thread_b, "b", 5, KERNEL_USER);

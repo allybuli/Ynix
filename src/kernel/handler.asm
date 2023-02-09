@@ -7,6 +7,7 @@ section .text
 
 %macro INTERRUPT_HANDLER 2
 interrupt_handler_%1:
+
 %ifn %2
     push 0x20222202
 %endif

@@ -3,6 +3,7 @@
 #include "../include/ynix/debug.h"
 #include "../include/ynix/assert.h"
 #include "../include/ynix/syscall.h"
+#include "../include/ynix/task.h"
 
 #define SYSCALL_SIZE 64
 handler_t syscall_table[SYSCALL_SIZE];
@@ -19,8 +20,18 @@ static void sys_default() {
     panic("syscall not implemented!!!");
 }
 
-static u32 sys_test() {
-    DEBUGK("syscall test...\n");
+static u32 sys_test() {    
+    // DEBUGK("syscall test...\n");
+    
+    static task_t* task = NULL;
+    if(!task) {
+        task = running_task();
+        task_block(task, NULL, TASK_BLOCKED);
+    } else {
+        task_unblock(task);
+        task = NULL;
+    }
+
     return 255;
 }
 
