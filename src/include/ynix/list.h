@@ -3,6 +3,9 @@
 
 #include "types.h"
 
+#define element_offset(type, member) (u32)(&((type *)0)->member)
+#define element_entry(type, member, ptr) (type *)((u32)ptr - element_offset(type, member))
+
 // 侵入式链表
 typedef struct list_node_t {
     struct list_node_t* prev;

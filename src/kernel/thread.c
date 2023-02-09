@@ -4,24 +4,31 @@
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
-u32 idle_thread() {
+void idle_thread() {
     set_interrupt_state(true);
-    u32 counter = 0;
     while(true) {
-        LOGK("idle task.... %d\n", counter++);
         asm volatile(
             "sti\n"
             "hlt\n"
         );
         yield();       
     }
-    return -1;    
 }
 
-u32 init_thread() {
+void init_thread() {
     set_interrupt_state(true);
+    u32 counter = 0;
     while(true) {
-        LOGK("init task...\n");
+        LOGK("init task...\n", counter++);
+        sleep(50000);
     }
-    return -1;
+}
+
+void test_thread() {
+    set_interrupt_state(true);
+    u32 counter = 0;
+    while(true) {
+        LOGK("test task...\n", counter++);
+        sleep(70900);
+    }
 }

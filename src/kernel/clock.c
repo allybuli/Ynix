@@ -16,10 +16,16 @@
 
 // 时间片计数器
 u32 volatile jiffies = 0;
+u32 jiffy = JIFFY;
+
+extern void task_wakeup();
 
 void clock_handler(int vector) {
     assert(vector == 0x20);
     send_eoi(vector);
+
+    // 在每个时间片结束的时刻唤醒睡眠结束的任务
+    task_wakeup();
 
     jiffies++;
     // if(jiffies % 1000 == 0) DEBUGK("clock jiffies %d ...\n", jiffies);

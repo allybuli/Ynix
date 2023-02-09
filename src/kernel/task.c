@@ -17,6 +17,7 @@ extern void task_switch(task_t* next);
 #define NR_TASKS 64
 static task_t *task_table[NR_TASKS];
 static list_t block_list; // 任务默认阻塞链表
+static list_t sleep_list; // 任务睡眠链表
 static task_t* idle_task; // 基础任务
 
 static task_t *get_free_task() {
@@ -87,6 +88,54 @@ void task_unblock(task_t* task) {
     task->state = TASK_READY;
 }
 
+extern u32 volatile jiffies;
+extern u32 jiffy;
+
+void task_sleep(u32 ms) {
+    assert(!get_interrupt_state());
+    u32 ticks = ms / jiffy + (ms % jiffy != 0);
+    ticks = ticks > 0 ? ticks : 1;
+
+    task_t* cur = running_task();
+    cur->ticks = jiffies + ticks;
+    
+    // 将任务插入睡眠链表
+    list_t* list = &sleep_list;
+    list_node_t* target_node = &list->tail;
+    for(list_node_t* ptr = list->head.next; ptr != &list->tail; ptr = ptr->next) {
+        task_t* task = element_entry(task_t, node, ptr);
+        if(task->ticks > cur->ticks) {
+            target_node = ptr;
+            break;
+        }
+    }
+
+    assert(cur->node.next == NULL);
+    assert(cur->node.prev == NULL);
+
+    list_insert_before(target_node, &cur->node);
+
+    cur->state = TASK_SLEEPING;
+    schedule();
+}
+
+void task_wakeup() {
+    assert(!get_interrupt_state());
+
+    list_t* list = &sleep_list;
+    for(list_node_t* ptr = list->head.next; ptr != &list->tail;) {
+        task_t* task = element_entry(task_t, node, ptr);
+        if(task->ticks > jiffies) {
+            break;
+        }
+        // unblock 会将指针清空
+        ptr = ptr->next;
+        
+        task->ticks = 0;
+        task_unblock(task);
+    }
+}
+
 void schedule() {
     assert(!get_interrupt_state());
     task_t *cur = running_task();
@@ -107,30 +156,6 @@ void schedule() {
     }
 
     task_switch(next);
-}
-
-u32 thread_a() {
-    set_interrupt_state(true);
-    while(true) {
-        printk("A");
-        test();
-    }
-}
-
-u32 thread_b() {
-    set_interrupt_state(true);
-    while(true) {
-        printk("B");
-        test();
-    }
-}
-
-u32 thread_c() {
-    set_interrupt_state(true);
-    while(true) {
-        printk("C");
-        test();
-    }
 }
 
 static task_t *task_create(target_t target, const char *name, u32 priority, u32 uid)
@@ -171,13 +196,16 @@ static void task_setup() {
     memset(task_table, 0, sizeof(task_table));
 }
 
-extern u32 idle_thread();
-extern u32 init_thread();
+extern void idle_thread();
+extern void init_thread();
+extern void test_thread();
 
 void task_init() {
     list_init(&block_list);
+    list_init(&sleep_list);
     task_setup();
 
     idle_task = task_create(idle_thread, "idle", 1, KERNEL_USER);
     task_create(init_thread, "init", 5, NORMAL_USER);
+    task_create(test_thread, "test", 5, KERNEL_USER);
 }
