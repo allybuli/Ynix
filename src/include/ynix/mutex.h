@@ -14,14 +14,14 @@ void mutex_lock(mutex_t*);
 void mutex_unlock(mutex_t*);
 
 // 可重入自旋锁
-typedef struct spinlock_t {
+typedef struct lock_t {
     struct task_t* holder;
     mutex_t mutex;
     u32 repeat; // 重入次数
-} spinlock_t;
+} lock_t;
 
-void spin_init(spinlock_t*);
-void spin_lock(spinlock_t*);
-void spin_unlock(spinlock_t*);
+void lock_init(lock_t*);
+void lock_acquire(lock_t*);
+void lock_release(lock_t*);
 
 #endif
