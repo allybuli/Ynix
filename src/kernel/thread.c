@@ -16,16 +16,16 @@ void idle_thread() {
     }
 }
 
-mutex_t mutex;
+spinlock_t lock;
 
 void init_thread() {
-    mutex_init(&mutex);
+    spin_init(&lock);
     set_interrupt_state(true);
     u32 counter = 0;
     while(true) {
-        mutex_lock(&mutex);
+        spin_lock(&lock);
         LOGK("init task...\n", counter++);
-        mutex_unlock(&mutex);
+        spin_unlock(&lock);
         // sleep(50000);
     }
 }
@@ -34,9 +34,9 @@ void test_thread() {
     set_interrupt_state(true);
     u32 counter = 0;
     while(true) {
-        mutex_lock(&mutex);
+        spin_lock(&lock);
         LOGK("test task...\n", counter++);
-        mutex_unlock(&mutex);
+        spin_unlock(&lock);
         // sleep(70900);
     }
 }
