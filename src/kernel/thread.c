@@ -16,17 +16,12 @@ void idle_thread() {
     }
 }
 
-lock_t lock;
-
 void init_thread() {
-    lock_init(&lock);
     set_interrupt_state(true);
     u32 counter = 0;
     while(true) {
-        lock_acquire(&lock);
-        LOGK("init task...\n", counter++);
-        lock_release(&lock);
-        // sleep(50000);
+        // LOGK("init task...\n", counter++);
+        sleep(50000);
     }
 }
 
@@ -34,9 +29,7 @@ void test_thread() {
     set_interrupt_state(true);
     u32 counter = 0;
     while(true) {
-        lock_acquire(&lock);
-        LOGK("test task...\n", counter++);
-        lock_release(&lock);
-        // sleep(70900);
+        // LOGK("test task...\n", counter++);
+        sleep(70900);
     }
 }

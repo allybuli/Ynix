@@ -6,6 +6,7 @@
 #define IDT_SIZE 256
 
 #define IRQ_CLOCK 0      // 时钟
+#define IRQ_KEYBOARD 1   // 键盘
 
 #define IRQ_MASTER_NR 0x20 // 主片起始向量号
 #define IRQ_SLAVE_NR 0x28  // 从片起始向量号
