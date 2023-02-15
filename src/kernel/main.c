@@ -19,6 +19,9 @@
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
+extern void keyboard_init();
+extern void syscall_init();
+
 void kernel_init() {
     interrupt_init();
     clock_init();

@@ -4,6 +4,7 @@
 #include "../include/ynix/task.h"
 #include "../include/ynix/ynix.h"
 #include "../include/ynix/debug.h"
+#include "../include/ynix/io.h"
 
 #define PIT_CHAN0_REG 0X40
 #define PIT_CHAN2_REG 0X42
