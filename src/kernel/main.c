@@ -21,8 +21,10 @@
 
 extern void keyboard_init();
 extern void syscall_init();
+extern void tss_init();
 
 void kernel_init() {
+    tss_init();
     interrupt_init();
     clock_init();
     keyboard_init();
