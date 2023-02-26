@@ -4,6 +4,7 @@
 #include "../include/ynix/mutex.h"
 #include "../include/ynix/task.h"
 #include "../include/ynix/stdio.h"
+#include "../include/ynix/arena.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -39,8 +40,21 @@ void init_thread() {
 void test_thread() {
     set_interrupt_state(true);
     u32 counter = 0;
+
     while(true) {
-        // LOGK("test task...\n", counter++);
-        sleep(70900);
+        // LOGK("test task %d....\n", counter++);
+        void *ptr = kmalloc(1200);
+        LOGK("kmalloc 0x%p....\n", ptr);
+        kfree(ptr);
+
+        ptr = kmalloc(1024);
+        LOGK("kmalloc 0x%p....\n", ptr);
+        kfree(ptr);
+
+        ptr = kmalloc(54);
+        LOGK("kmalloc 0x%p....\n", ptr);
+        kfree(ptr);
+
+        sleep(5000);
     }
 }

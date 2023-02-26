@@ -22,9 +22,11 @@
 extern void keyboard_init();
 extern void syscall_init();
 extern void tss_init();
+extern void arena_init();
 
 void kernel_init() {
     tss_init();
+    arena_init();
     interrupt_init();
     clock_init();
     keyboard_init();
