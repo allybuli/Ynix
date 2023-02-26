@@ -2,6 +2,7 @@
 #include "../include/ynix/syscall.h"
 #include "../include/ynix/debug.h"
 #include "../include/ynix/mutex.h"
+#include "../include/ynix/task.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -16,13 +17,22 @@ void idle_thread() {
     }
 }
 
-void init_thread() {
-    set_interrupt_state(true);
+static void real_init_thread() {
     u32 counter = 0;
+    char ch;
     while(true) {
         // LOGK("init task...\n", counter++);
-        sleep(50000);
+        // asm volatile("in $0x92, %ax\n");
+        // sleep(5);
+        // LOGK("%c\n", ch);
+        // printk("%c", ch);
     }
+}
+
+void init_thread() {
+    // set_interrupt_state(true);
+    char temp[100];
+    task_to_user_mode(real_init_thread);
 }
 
 void test_thread() {

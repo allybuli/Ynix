@@ -10,8 +10,10 @@
 #include "../include/ynix/assert.h"
 #include "../include/ynix/syscall.h"
 #include "../include/ynix/list.h"
+#include "../include/ynix/global.h"
 
 extern bitmap_t kernel_map;
+extern tss_t tss;
 extern void task_switch(task_t* next);
 
 #define NR_TASKS 64
@@ -136,6 +138,15 @@ void task_wakeup() {
     }
 }
 
+// 激活任务
+void task_activate(task_t* task) {
+    assert(task->magic == YNIX_MAGIC);
+
+    if(task->uid != KERNEL_USER) {
+        tss.esp0 = (u32)task + PAGE_SIZE;
+    }
+}
+
 void schedule() {
     assert(!get_interrupt_state());
     task_t *cur = running_task();
@@ -155,6 +166,7 @@ void schedule() {
         return;
     }
 
+    task_activate(next);
     task_switch(next);
 }
 
@@ -186,6 +198,46 @@ static task_t *task_create(target_t target, const char *name, u32 priority, u32 
     task->magic = YNIX_MAGIC;
 
     return task;
+}
+
+// 调用该函数的地方不能有任何局部变量
+// 调用前栈顶需要准备足够的空间
+void task_to_user_mode(target_t target) {
+    task_t* task = running_task();
+    u32 addr = (u32)task + PAGE_SIZE;
+    addr -= sizeof(intr_frame_t);
+    intr_frame_t* iframe = (intr_frame_t*)(addr);
+
+    iframe->vector = 0x20;
+    iframe->edi = 1;
+    iframe->esi = 2;
+    iframe->ebp = 3;
+    iframe->esp_dummy = 4;
+    iframe->ebx = 5;
+    iframe->edx = 6;
+    iframe->ecx = 7;
+    iframe->eax = 8;
+
+    iframe->gs = 0;
+    iframe->ds = USER_DATA_SELECTOR;
+    iframe->es = USER_DATA_SELECTOR;
+    iframe->fs = USER_DATA_SELECTOR;
+    iframe->ss = USER_DATA_SELECTOR;
+    iframe->cs = USER_CODE_SELECTOR;
+
+    iframe->error = YNIX_MAGIC;
+
+    u32 stack = alloc_kpage(1);
+
+    iframe->eip = (u32)target;
+    iframe->eflags = (0 << 12 | 0b10 | 1 << 9);
+    iframe->esp = stack + PAGE_SIZE;
+
+    asm volatile(
+        "movl %0, %%esp\n"
+        "jmp interrupt_exit\n"
+        ::"m"(iframe)
+    );
 }
 
 static void task_setup() {
