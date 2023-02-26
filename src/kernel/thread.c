@@ -3,6 +3,7 @@
 #include "../include/ynix/debug.h"
 #include "../include/ynix/mutex.h"
 #include "../include/ynix/task.h"
+#include "../include/ynix/stdio.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -23,9 +24,9 @@ static void real_init_thread() {
     while(true) {
         // LOGK("init task...\n", counter++);
         // asm volatile("in $0x92, %ax\n");
-        // sleep(5);
+        sleep(200);
         // LOGK("%c\n", ch);
-        // printk("%c", ch);
+        printf("user mode %d\n", counter ++);
     }
 }
 

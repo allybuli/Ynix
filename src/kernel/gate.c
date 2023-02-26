@@ -4,6 +4,7 @@
 #include "../include/ynix/assert.h"
 #include "../include/ynix/syscall.h"
 #include "../include/ynix/task.h"
+#include "../include/ynix/console.h"
 
 #define SYSCALL_SIZE 64
 handler_t syscall_table[SYSCALL_SIZE];
@@ -35,6 +36,14 @@ static u32 sys_test() {
     return 255;
 }
 
+static u32 sys_write(fd_t fd, char* buf, u32 len) {
+    if(stdout == fd || stderr == fd) {
+        return console_write(buf, len);
+    }
+    panic("write!!!");
+    return 0;
+}
+
 extern void task_yield();
 
 void syscall_init() {
@@ -54,4 +63,5 @@ void syscall_init() {
     syscall_table[SYS_NR_TEST] = sys_test;
     syscall_table[SYS_NR_SLEEP] = task_sleep;
     syscall_table[SYS_NR_YIELD] = task_yield;
+    syscall_table[SYS_NR_WRITE] = sys_write;
 }

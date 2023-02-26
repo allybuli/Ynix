@@ -133,9 +133,10 @@ static void command_lf() {
     scroll_up();
 }
 
-void console_write(char* buf, u32 count) {
+u32 console_write(char* buf, u32 count) {
     bool intr = interrupt_disable();
-    for(u32 i = 0; i < count; i++) {
+    u32 num = 0;
+    for(u32 i = 0; i < count; i++, num ++) {
         switch(buf[i]) {
             case ASCII_NUL:
                 break;;
@@ -178,6 +179,7 @@ void console_write(char* buf, u32 count) {
     }
     set_cursor();
     set_interrupt_state(intr);
+    return num;
 }
 
 void console_init() {
