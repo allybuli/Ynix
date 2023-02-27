@@ -28,11 +28,19 @@ typedef struct page_entry_t {
 // 内核页目录索引
 #define KERNEL_PAGE_DIR 0x1000
 
+// 内核占用的内存大小 8M
+#define KERNEL_MEMORY_SIZE 0x800000
+// 用户栈顶地址 128M
+#define USER_STACK_TOP 0x8000000
+
 u32 get_cr3();
 void set_cr3(u32 pde);
 
 u32 alloc_kpage(u32 count);
 void free_kpage(u32 addr, u32 count);
+
+void link_page(u32 vaddr);
+void unlink_page(u32 vaddr);
 
 void memory_test();
 

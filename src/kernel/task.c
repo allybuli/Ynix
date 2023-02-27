@@ -11,6 +11,7 @@
 #include "../include/ynix/syscall.h"
 #include "../include/ynix/list.h"
 #include "../include/ynix/global.h"
+#include "../include/ynix/arena.h"
 
 extern bitmap_t kernel_map;
 extern tss_t tss;
@@ -204,6 +205,11 @@ static task_t *task_create(target_t target, const char *name, u32 priority, u32 
 // 调用前栈顶需要准备足够的空间
 void task_to_user_mode(target_t target) {
     task_t* task = running_task();
+
+    task->vmap = kmalloc(sizeof(bitmap_t));
+    void* buf = alloc_kpage(1);
+    bitmap_init(task->vmap, buf, PAGE_SIZE, KERNEL_MEMORY_SIZE/ PAGE_SIZE);
+
     u32 addr = (u32)task + PAGE_SIZE;
     addr -= sizeof(intr_frame_t);
     intr_frame_t* iframe = (intr_frame_t*)(addr);

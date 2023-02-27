@@ -22,16 +22,10 @@ static void sys_default() {
 }
 
 static u32 sys_test() {    
-    // DEBUGK("syscall test...\n");
-    
-    static task_t* task = NULL;
-    if(!task) {
-        task = running_task();
-        task_block(task, NULL, TASK_BLOCKED);
-    } else {
-        task_unblock(task);
-        task = NULL;
-    }
+    char* addr = 0x1600000;
+    link_page(addr);
+    addr[3] = 'T';
+    unlink_page(addr);
 
     return 255;
 }
