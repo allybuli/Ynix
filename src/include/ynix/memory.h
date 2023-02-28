@@ -33,6 +33,13 @@ typedef struct page_entry_t {
 // 用户栈顶地址 128M
 #define USER_STACK_TOP 0x8000000
 
+// 用户栈最大 2M
+#define USER_STACK_SIZE 0x200000
+
+// 用户栈底地址 128M - 2M
+#define USER_STACK_BOTTOM (USER_STACK_TOP - USER_STACK_SIZE)
+
+u32 get_cr2();
 u32 get_cr3();
 void set_cr3(u32 pde);
 
@@ -41,6 +48,8 @@ void free_kpage(u32 addr, u32 count);
 
 void link_page(u32 vaddr);
 void unlink_page(u32 vaddr);
+
+page_entry_t* copy_pde();
 
 void memory_test();
 

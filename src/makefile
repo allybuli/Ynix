@@ -76,11 +76,11 @@ clean:
 
 .PHONY: bochs
 bochs: $(BUILD)/master.img
-	bochs -q -f ../bochs/bochsrc -unlock
+	sudo bochs -q -f ../bochs/bochsrc -unlock
 
 .PHONY: bochsg
 bochsg: $(BUILD)/master.img
-	bochs-gdb -q -f ../bochs/bochsrc.gdb -unlock
+	sudo bochs-gdb -q -f ../bochs/bochsrc.gdb -unlock
 
 .PHONY: qemu
 qemu: $(BUILD)/master.img

@@ -143,6 +143,11 @@ void task_wakeup() {
 void task_activate(task_t* task) {
     assert(task->magic == YNIX_MAGIC);
 
+    // 每个任务都有自己的页目录
+    if(task->pde != get_cr3()) {
+        set_cr3(task->pde);
+    }
+
     if(task->uid != KERNEL_USER) {
         tss.esp0 = (u32)task + PAGE_SIZE;
     }
@@ -206,9 +211,13 @@ static task_t *task_create(target_t target, const char *name, u32 priority, u32 
 void task_to_user_mode(target_t target) {
     task_t* task = running_task();
 
+    // 创建用户进程虚拟内存位图
     task->vmap = kmalloc(sizeof(bitmap_t));
     void* buf = alloc_kpage(1);
     bitmap_init(task->vmap, buf, PAGE_SIZE, KERNEL_MEMORY_SIZE/ PAGE_SIZE);
+    // 创建用户进程页目录
+    task->pde = copy_pde();
+    set_cr3(task->pde);
 
     u32 addr = (u32)task + PAGE_SIZE;
     addr -= sizeof(intr_frame_t);
@@ -232,12 +241,9 @@ void task_to_user_mode(target_t target) {
     iframe->cs = USER_CODE_SELECTOR;
 
     iframe->error = YNIX_MAGIC;
-
-    u32 stack = alloc_kpage(1);
-
     iframe->eip = (u32)target;
     iframe->eflags = (0 << 12 | 0b10 | 1 << 9);
-    iframe->esp = stack + PAGE_SIZE;
+    iframe->esp = USER_STACK_TOP;
 
     asm volatile(
         "movl %0, %%esp\n"
