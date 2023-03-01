@@ -28,9 +28,12 @@ static void user_init_thread() {
     u32 counter = 0;
     while(true) {
         // test();
-        test_recursion();
-        sleep(4);
-        printf("user mode %d\n", counter ++);
+        // test_recursion();
+        // printf("user mode %d\n", counter ++);
+        char* ptr = 0x900000;
+        brk(ptr);
+        ptr[-3] = 'T';
+        sleep(4000);
     }
 }
 
@@ -45,19 +48,8 @@ void test_thread() {
     u32 counter = 0;
 
     while(true) {
-        LOGK("test task %d....\n", counter++);
-        // void *ptr = kmalloc(1200);
-        // LOGK("kmalloc 0x%p....\n", ptr);
-        // kfree(ptr);
+        // LOGK("test task %d....\n", counter++);
 
-        // ptr = kmalloc(1024);
-        // LOGK("kmalloc 0x%p....\n", ptr);
-        // kfree(ptr);
-
-        // ptr = kmalloc(54);
-        // LOGK("kmalloc 0x%p....\n", ptr);
-        // kfree(ptr);
-
-        sleep(4);
+        sleep(4000);
     }
 }

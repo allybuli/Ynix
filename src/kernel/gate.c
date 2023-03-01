@@ -5,6 +5,7 @@
 #include "../include/ynix/syscall.h"
 #include "../include/ynix/task.h"
 #include "../include/ynix/console.h"
+#include "../include/ynix/memory.h"
 
 #define SYSCALL_SIZE 64
 handler_t syscall_table[SYSCALL_SIZE];
@@ -58,4 +59,5 @@ void syscall_init() {
     syscall_table[SYS_NR_SLEEP] = task_sleep;
     syscall_table[SYS_NR_YIELD] = task_yield;
     syscall_table[SYS_NR_WRITE] = sys_write;
+    syscall_table[SYS_NR_BRK] = sys_brk;
 }
