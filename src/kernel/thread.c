@@ -29,10 +29,7 @@ static void user_init_thread() {
     while(true) {
         // test();
         // test_recursion();
-        // printf("user mode %d\n", counter ++);
-        char* ptr = 0x900000;
-        brk(ptr);
-        ptr[-3] = 'T';
+        printf("user mode %d %d %d\n", counter ++, getpid(), getppid());
         sleep(4000);
     }
 }
@@ -48,7 +45,7 @@ void test_thread() {
     u32 counter = 0;
 
     while(true) {
-        // LOGK("test task %d....\n", counter++);
+        LOGK("test task %d %d %d\n", counter++, getpid(), getppid());
 
         sleep(4000);
     }

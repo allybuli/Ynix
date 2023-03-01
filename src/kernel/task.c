@@ -27,6 +27,8 @@ static task_t *get_free_task() {
     for (size_t i = 0; i < NR_TASKS; i++) {
         if (task_table[i] == NULL) {
             task_table[i] = (task_t *)alloc_kpage(1); // todo free_kpage
+            memset(task_table[i], 0, PAGE_SIZE);
+            task_table[i]->pid = i;
             return task_table[i];
         }
     }
@@ -179,7 +181,6 @@ void schedule() {
 static task_t *task_create(target_t target, const char *name, u32 priority, u32 uid)
 {
     task_t *task = get_free_task();
-    memset(task, 0, PAGE_SIZE);
 
     u32 stack = (u32)task + PAGE_SIZE;
 
@@ -259,6 +260,16 @@ static void task_setup() {
     task->ticks = 1;
 
     memset(task_table, 0, sizeof(task_table));
+}
+
+pid_t sys_getpid() {
+    task_t* task = running_task();
+    return task->pid;
+}
+
+pid_t sys_getppid() {
+    task_t* task = running_task();
+    return task->ppid;
 }
 
 extern void idle_thread();
