@@ -36,6 +36,7 @@ typedef struct task_t {
     struct bitmap_t *vmap;   // 进程虚拟内存位图
     u32 brk;                 // 进程堆内存最高地址
     int status;              // 进程结束状态
+    pid_t waitpid;           // 等待结束的子进程id
     u32 magic;               // 内核魔数，用于检测栈溢出
 } task_t;
 
@@ -94,5 +95,6 @@ pid_t sys_getpid();
 pid_t sys_getppid();
 pid_t task_fork();
 void task_exit();
+pid_t task_waitpid(pid_t, int32*);
 
 #endif

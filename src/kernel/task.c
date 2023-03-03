@@ -341,7 +341,9 @@ void task_exit(int status) {
     free_kpage(task->vmap->bits, 1);
     kfree(task->vmap);
 
-    for(size_t i = 0; i < NR_TASKS; i++) {
+    // 0号进程是基本进程(空转)
+    // 1号进程是init进程
+    for(size_t i = 2; i < NR_TASKS; i++) {
         if(NULL == task_table[i]) {
             continue;
         }
@@ -353,7 +355,32 @@ void task_exit(int status) {
     // pid_t pid = task->pid;
     // free_kpage((u32)task, 1);
     // task_table[pid] = NULL;
+
+    task_t* parent = task_table[task->ppid];
+    if(TASK_WAITING == parent->state && parent->waitpid == task->pid) {
+        task_unblock(parent);
+    }
     schedule();
+}
+
+pid_t task_waitpid(pid_t pid, int32* status) {
+    // 寻找进程号为pid的子进程
+    // 不存在，返回-1
+    // 目标子进程未死亡
+    if(pid < 0 || pid > NR_TASKS) return -1;
+    if(NULL == task_table[pid]) return -1;
+    task_t* task = running_task();
+    if(task_table[pid]->ppid != task->pid) return -1;
+    while(task_table[pid]->state != TASK_DIED) {
+        task->waitpid = pid;
+        task_block(task, NULL, TASK_WAITING);
+        if(NULL == task_table[pid]) break;
+    }
+    assert(NULL != task_table[pid]);
+    *status = task_table[pid]->status;
+    free_kpage((u32)task_table[pid], 1);
+    task_table[pid] = NULL;
+    return pid;
 }
 
 extern void idle_thread();

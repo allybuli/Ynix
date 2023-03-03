@@ -33,11 +33,16 @@ static void user_init_thread() {
         pid_t pid = fork();
         if(pid) {
             printf("father thread %d %d %d\n", pid, getpid(), getppid());
+            int status = 0;
+            // sleep(1000);
+            pid_t child = waitpid(pid, &status);
+            printf("wait pid %d status %d %d\n", child, status, counter++);
         } else {
             printf("child thread %d %d %d\n", pid, getpid(), getppid());
+            sleep(1000);
             exit(0);
         }
-        sleep(20);
+        sleep(2000);
     }
 }
 
@@ -54,6 +59,6 @@ void test_thread() {
     while(true) {
         // LOGK("test task %d %d %d\n", counter++, getpid(), getppid());
 
-        sleep(50);
+        sleep(1000);
     }
 }

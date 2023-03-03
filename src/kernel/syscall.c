@@ -75,3 +75,7 @@ pid_t fork() {
 void exit() {
     _syscall0(SYS_NR_EXIT);
 }
+
+pid_t waitpid(pid_t pid, int32* status) {
+    return _syscall2(SYS_NR_WAITPID, pid, status);
+}

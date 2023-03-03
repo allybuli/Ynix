@@ -13,6 +13,7 @@ typedef enum syscall_t {
     SYS_NR_GETPPID,
     SYS_NR_FORK,
     SYS_NR_EXIT,
+    SYS_NR_WAITPID,
 } syscall_t;
 
 u32 test();
@@ -24,5 +25,6 @@ pid_t getpid();
 pid_t getppid();
 pid_t fork();
 void exit();
+pid_t waitpid(pid_t, int32*);
 
 #endif
