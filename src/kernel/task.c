@@ -272,6 +272,60 @@ pid_t sys_getppid() {
     return task->ppid;
 }
 
+extern void interrupt_exit();
+
+static void task_build_stack(task_t* task) {
+    u32 addr = (u32)task + PAGE_SIZE;
+    addr -= sizeof(intr_frame_t);
+    intr_frame_t* iframe = (intr_frame_t*)addr;
+    // fork调用子进程返回0
+    iframe->eax = 0;
+
+    addr -= sizeof(task_frame_t);
+    task_frame_t* tframe = (task_frame_t*)addr;
+    tframe->ebp = 0xaa55aa55;
+    tframe->ebx = 0xaa55aa55;
+    tframe->edi = 0xaa55aa55;
+    tframe->esi = 0xaa55aa55;
+    tframe->eip = interrupt_exit;
+    task->stack = (u32*)tframe;
+}
+
+pid_t task_fork() {
+    // 1、复制进程资源
+    // 2、子进程设为就绪状态(子进程开始执行)
+    task_t* task = running_task();
+    assert(task->state == TASK_RUNNING && task->node.next == NULL && task->node.prev == NULL);
+
+    // 拷贝内核栈和PCB
+    task_t* child = get_free_task();
+    pid_t child_pid = child->pid;
+    memcpy(child, task, PAGE_SIZE);
+    child->pid = child_pid;
+    child->ppid = task->pid;
+    child->ticks = child->priority;
+    child->state = TASK_READY;
+
+    // 拷贝虚拟内存位图(深拷贝)
+    child->vmap = kmalloc(sizeof(bitmap_t));
+    memcpy(child->vmap, task->vmap, sizeof(bitmap_t));
+
+    // 拷贝虚拟位图缓存
+    void* buf = alloc_kpage(1);
+    // todo free_kpage
+    memcpy(buf, task->vmap->bits, PAGE_SIZE);
+    child->vmap->bits = buf;
+
+    // 拷贝页目录
+    child->pde = copy_pde();
+
+    // 构造 child 内核栈
+    task_build_stack(child); // ROP
+
+    // fork调用父进程返回子进程的id
+    return child->pid;
+}
+
 extern void idle_thread();
 extern void init_thread();
 extern void test_thread();

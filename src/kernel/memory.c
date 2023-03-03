@@ -115,6 +115,7 @@ void memory_map_init() {
     bitmap_scan(&kernel_map, memory_map_pages);
 }
 
+// 返回的是物理地址
 static u32 get_page() {
     for(size_t i = start_page; i < total_pages; i++) {
         if(!memory_map[i]) {
@@ -341,6 +342,23 @@ u32 get_cr2() {
     asm volatile("movl %cr2, %eax");
 }
 
+// 拷贝一页，返回拷贝后的物理地址
+// 内核被映射到低地址区域
+// 内核空间下，物理地址和虚拟地址相同
+static u32 copy_page(void* page) {
+    ASSERT_PAGE((u32)page);
+    u32 paddr = get_page();
+    // 使用内核栈的虚拟地址0x0地址的页表 映射新分配的物理页
+    page_entry_t* entry = get_pte(0, false);
+    // 虚拟地址0x0 映射到 物理地址paddr
+    entry_init(entry, IDX(paddr));
+    memcpy((void*)0, (void*)page, PAGE_SIZE);
+    // 解除虚拟地址0x0 到 物理地址paddr 的映射
+    // 复原内核页表
+    entry->present = false;
+    return paddr;
+}
+
 typedef struct page_error_code_t {
     u8 present : 1;
     u8 write : 1;
@@ -368,6 +386,31 @@ void page_fault(
     assert(KERNEL_MEMORY_SIZE <= vaddr && vaddr < USER_STACK_TOP);
 
     task_t* task = running_task();
+    if(code->present) {
+        // 写时复制机制
+        // 写操作，导致的缺页异常
+        // fork调用，将页表项设置为了只读
+        assert(code->write);
+        page_entry_t* pte = get_pte(vaddr, false);
+        page_entry_t* entry = &pte[TIDX(vaddr)];
+        assert(entry->present);
+        assert(memory_map[entry->index] > 0);
+        if(memory_map[entry->index] == 1) {
+            // 子进程物理页已拷贝
+            entry->write = true;
+            LOGK("Write page for 0x%p\n", vaddr);
+        } else {
+            // 拷贝物理页
+            void* page = (void*)PAGE(IDX(vaddr));
+            u32 paddr = copy_page(page);
+            memory_map[entry->index] --;
+            entry_init(entry, IDX(paddr));
+            flush_tlb(vaddr);
+            LOGK("Copy page for 0x%p\n", vaddr);
+        }
+        return;
+    }
+
     // 目标地址不在内存，但在可知内存区域(堆区/栈区)
     if(!code->present && (vaddr < task->brk || vaddr >= USER_STACK_BOTTOM)) {
         u32 page = PAGE(IDX(vaddr));
@@ -384,6 +427,28 @@ page_entry_t* copy_pde() {
     memcpy(pde, task->pde, PAGE_SIZE);
     page_entry_t* entry = &pde[ENTRY_SIZE-1];
     entry_init(entry, IDX(pde));
+    // 拷贝用户空间页表
+    for(size_t pde_idx = sizeof(KERNEL_PAGE_TABLE) / sizeof(KERNEL_PAGE_TABLE[0]); pde_idx < ENTRY_SIZE - 1; pde_idx++) {
+        if(!pde[pde_idx].present) {
+            continue;
+        }
+        page_entry_t* pte = (page_entry_t*)((pde_idx << 12) | PTE_MASK);
+        for(size_t pte_idx = 0; pte_idx < ENTRY_SIZE; pte_idx++) {
+            page_entry_t* entry = &pte[pte_idx];
+            if(!entry->present) {
+                continue;
+            }
+            assert(memory_map[entry->index] > 0);
+            // 父子进程共享物理内存页设置为只读
+            entry->write = false;
+            // 子进程也引用了该物理内存页
+            assert(memory_map[entry->index] < 255);
+            memory_map[entry->index] ++;
+        }
+        u32 paddr = copy_page(pte);
+        pde[pde_idx].index = IDX(paddr);
+    }
+    set_cr3(task->pde);
     return pde;
 }
 

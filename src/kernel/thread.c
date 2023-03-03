@@ -29,7 +29,14 @@ static void user_init_thread() {
     while(true) {
         // test();
         // test_recursion();
-        printf("user mode %d %d %d\n", counter ++, getpid(), getppid());
+        // printf("user mode %d %d %d\n", counter ++, getpid(), getppid());
+        pid_t pid = fork();
+        if(pid) {
+            printf("father thread %d %d %d\n", pid, getpid(), getppid());
+        } else {
+            printf("child thread %d %d %d\n", pid, getpid(), getppid());
+        }
+        hang();
         sleep(4000);
     }
 }
@@ -45,7 +52,7 @@ void test_thread() {
     u32 counter = 0;
 
     while(true) {
-        LOGK("test task %d %d %d\n", counter++, getpid(), getppid());
+        // LOGK("test task %d %d %d\n", counter++, getpid(), getppid());
 
         sleep(4000);
     }
