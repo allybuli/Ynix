@@ -350,6 +350,9 @@ void task_exit(int status) {
         }
     }
     LOGK("Task 0x%p exit\n", task);
+    // pid_t pid = task->pid;
+    // free_kpage((u32)task, 1);
+    // task_table[pid] = NULL;
     schedule();
 }
 
