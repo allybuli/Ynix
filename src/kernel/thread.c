@@ -35,9 +35,9 @@ static void user_init_thread() {
             printf("father thread %d %d %d\n", pid, getpid(), getppid());
         } else {
             printf("child thread %d %d %d\n", pid, getpid(), getppid());
+            exit(0);
         }
-        hang();
-        sleep(4000);
+        sleep(200);
     }
 }
 
@@ -54,6 +54,6 @@ void test_thread() {
     while(true) {
         // LOGK("test task %d %d %d\n", counter++, getpid(), getppid());
 
-        sleep(4000);
+        sleep(500);
     }
 }

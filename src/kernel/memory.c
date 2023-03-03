@@ -421,7 +421,6 @@ void page_fault(
 }
 
 page_entry_t* copy_pde() {
-    // todo free
     page_entry_t* pde = alloc_kpage(1);
     task_t* task = running_task();
     memcpy(pde, task->pde, PAGE_SIZE);
@@ -450,6 +449,31 @@ page_entry_t* copy_pde() {
     }
     set_cr3(task->pde);
     return pde;
+}
+
+void free_pde() {
+    task_t* task = running_task();
+    assert(task->uid != KERNEL_USER);
+
+    page_entry_t* pde = get_pde();
+    for(size_t pde_idx = 2; pde_idx < ENTRY_SIZE - 1; pde_idx++) {
+        page_entry_t* dentry = &pde[pde_idx];
+        if(!dentry->present) {
+            continue;
+        }
+        page_entry_t* pte = (page_entry_t*)((pde_idx << 12) | PTE_MASK);
+        for(size_t pte_idx = 0; pte_idx < ENTRY_SIZE; pte_idx++) {
+            page_entry_t* entry = &pte[pte_idx];
+            if(!entry->present) {
+                continue;
+            }
+            assert(memory_map[entry->index] > 0);
+            put_page(PAGE(entry->index));
+        }
+        put_page(PAGE(dentry->index));
+    }
+    free_kpage(task->pde, 1);
+    LOGK("Free pages %d\n", free_pages);
 }
 
 int32 sys_brk(void* addr) {

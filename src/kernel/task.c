@@ -13,6 +13,8 @@
 #include "../include/ynix/global.h"
 #include "../include/ynix/arena.h"
 
+#define LOGK(fmt, args...) DEBUGK(fmt, ##args)
+
 extern bitmap_t kernel_map;
 extern tss_t tss;
 extern void task_switch(task_t* next);
@@ -324,6 +326,31 @@ pid_t task_fork() {
 
     // fork调用父进程返回子进程的id
     return child->pid;
+}
+
+void task_exit(int status) {
+    // 不返回，进程结束后直接调度其它进程执行
+    // 1、释放资源
+    // 2、将当前进程的子进程托管给当前进程的父进程
+    task_t* task = running_task();
+    assert(task->state == TASK_RUNNING && task->node.next == NULL && task->node.prev == NULL);
+    task->state = TASK_DIED;
+    task->status = status;
+
+    free_pde();
+    free_kpage(task->vmap->bits, 1);
+    kfree(task->vmap);
+
+    for(size_t i = 0; i < NR_TASKS; i++) {
+        if(NULL == task_table[i]) {
+            continue;
+        }
+        if(task_table[i]->ppid == task->pid) {
+            task_table[i]->ppid = task->ppid;
+        }
+    }
+    LOGK("Task 0x%p exit\n", task);
+    schedule();
 }
 
 extern void idle_thread();
