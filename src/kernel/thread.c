@@ -30,18 +30,18 @@ static void user_init_thread() {
         // test();
         // test_recursion();
         // printf("user mode %d %d %d\n", counter ++, getpid(), getppid());
-        pid_t pid = fork();
-        if(pid) {
-            printf("father thread %d %d %d\n", pid, getpid(), getppid());
-            int status = 0;
-            // sleep(1000);
-            pid_t child = waitpid(pid, &status);
-            printf("wait pid %d status %d %d\n", child, status, counter++);
-        } else {
-            printf("child thread %d %d %d\n", pid, getpid(), getppid());
-            sleep(1000);
-            exit(0);
-        }
+        // pid_t pid = fork();
+        // if(pid) {
+        //     printf("father thread %d %d %d\n", pid, getpid(), getppid());
+        //     int status = 0;
+        //     // sleep(1000);
+        //     pid_t child = waitpid(pid, &status);
+        //     printf("wait pid %d status %d %d\n", child, status, counter++);
+        // } else {
+        //     printf("child thread %d %d %d\n", pid, getpid(), getppid());
+        //     sleep(1000);
+        //     exit(0);
+        // }
         sleep(2000);
     }
 }

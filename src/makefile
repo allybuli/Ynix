@@ -49,6 +49,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/mutex.o \
 	$(BUILD)/kernel/keyboard.o \
 	$(BUILD)/kernel/arena.o \
+	$(BUILD)/kernel/ide.o \
 	$(BUILD)/lib/string.o \
 	$(BUILD)/lib/vsprintf.o \
 	$(BUILD)/lib/stdlib.o \
