@@ -21,7 +21,8 @@ typedef struct ide_ctrl_t {
     lock_t lock;
     u16 iobase;
     ide_disk_t disks[IDE_DISK_NR];
-    ide_disk_t* active;  // 当前选择的磁盘
+    ide_disk_t* active;    // 当前选择的磁盘
+    struct task_t* waiter; // 等待控制器唤醒的进程
 } ide_ctrl_t;
 
 int ide_pio_read(ide_disk_t* disk, void* buf, u8 count, idx_t lba);

@@ -7,6 +7,10 @@
 
 #define IRQ_CLOCK 0      // 时钟
 #define IRQ_KEYBOARD 1   // 键盘
+#define IRQ_CASCADE 2    // 8259 从片控制器
+
+#define IRQ_HARDDISK 14  // ATA 硬盘第一通道
+#define IRQ_HARDDISK2 15 // ATA 硬盘第二通道
 
 #define IRQ_MASTER_NR 0x20 // 主片起始向量号
 #define IRQ_SLAVE_NR 0x28  // 从片起始向量号

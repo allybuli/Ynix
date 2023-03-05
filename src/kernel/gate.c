@@ -6,6 +6,10 @@
 #include "../include/ynix/task.h"
 #include "../include/ynix/console.h"
 #include "../include/ynix/memory.h"
+#include "../include/ynix/ide.h"
+#include "../include/ynix/string.h"
+
+#define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
 #define SYSCALL_SIZE 64
 handler_t syscall_table[SYSCALL_SIZE];
@@ -22,12 +26,20 @@ static void sys_default() {
     panic("syscall not implemented!!!");
 }
 
-static u32 sys_test() {    
-    char* addr = 0x1600000;
-    link_page(addr);
-    addr[3] = 'T';
-    unlink_page(addr);
 
+extern ide_ctrl_t controllers[2];
+
+static u32 sys_test() {    
+    u16 *buf = (u16 *)alloc_kpage(1);
+    LOGK("pio read buffer 0x%p\n", buf);
+    ide_disk_t *disk = &controllers[0].disks[0];
+    ide_pio_read(disk, buf, 4, 0);
+
+    memset(buf, 0x5a, 512);
+
+    ide_pio_write(disk, buf, 1, 1);
+
+    free_kpage((u32)buf, 1);
     return 255;
 }
 

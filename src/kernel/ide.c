@@ -145,6 +145,8 @@ static void ide_pio_write_sector(ide_disk_t *disk, u16 *buf) {
 // PIO 方式读取磁盘
 int ide_pio_read(ide_disk_t *disk, void *buf, u8 count, idx_t lba) {
     assert(count > 0);
+    // 异步IO，不允许中断发生
+    assert(!get_interrupt_state());
 
     ide_ctrl_t *ctrl = disk->ctrl;
 
@@ -163,6 +165,12 @@ int ide_pio_read(ide_disk_t *disk, void *buf, u8 count, idx_t lba) {
     outb(ctrl->iobase + IDE_COMMAND, IDE_CMD_READ);
 
     for(size_t i = 0; i < count; i++) {
+        // 系统初始化时，不能使用异步方式
+        task_t* task = running_task();
+        if(TASK_RUNNING == task->state) {
+            ctrl->waiter = task;
+            task_block(task, NULL, TASK_BLOCKED);
+        }
         ide_busy_wait(ctrl, IDE_SR_DRQ);
         u32 offset = ((u32)buf + i * SECTOR_SIZE);
         ide_pio_read_sector(disk, (u16 *)offset);
@@ -175,6 +183,8 @@ int ide_pio_read(ide_disk_t *disk, void *buf, u8 count, idx_t lba) {
 // PIO 方式写磁盘
 int ide_pio_write(ide_disk_t *disk, void *buf, u8 count, idx_t lba) {
     assert(count > 0);
+    // 异步IO，不允许中断发生
+    assert(!get_interrupt_state());
 
     ide_ctrl_t *ctrl = disk->ctrl;
 
@@ -197,6 +207,13 @@ int ide_pio_write(ide_disk_t *disk, void *buf, u8 count, idx_t lba) {
     for(size_t i = 0; i < count; i++) {
         u32 offset = ((u32)buf + i * SECTOR_SIZE);
         ide_pio_write_sector(disk, (u16 *)offset);
+        
+        // 系统初始化时，不能使用异步方式
+        task_t* task = running_task();
+        if(TASK_RUNNING == task->state) {
+            ctrl->waiter = task;
+            task_block(task, NULL, TASK_BLOCKED);
+        }        
 
         ide_busy_wait(ctrl, IDE_SR_NULL);
     }
@@ -233,18 +250,28 @@ static void ide_ctrl_init() {
     }
 }
 
+void ide_handler(int vector) {
+    send_eoi(vector);
+    ide_ctrl_t* ctrl = &controllers[vector - IRQ_HARDDISK - 0x20];
+    u8 state = inb(ctrl->iobase + IDE_STATUS);
+    LOGK("harddisk interrupt vector %d state 0x%x\n", vector, state);
+    if(ctrl->waiter) {
+        // 异步IO,唤醒发起IO请求的进程
+        task_unblock(ctrl->waiter);
+        ctrl->waiter = NULL;
+    }
+}
+
 void ide_init() {
     LOGK("ide init...\n");
     ide_ctrl_init();
 
-    void *buf = (void *)alloc_kpage(1);
-    // BMB;
-    LOGK("read buffer %x\n", buf);
-    ide_pio_read(&controllers[0].disks[0], buf, 1, 0);
-    // BMB;
-    memset(buf, 0x5a, SECTOR_SIZE);
-    // BMB;
-    ide_pio_write(&controllers[0].disks[0], buf, 1, 1);
-
-    free_kpage((u32)buf, 1);
+    // 新增两个硬盘中断0x2e和0x2f，用于硬盘读写
+    set_interrupt_handler(IRQ_HARDDISK, ide_handler);
+    set_interrupt_mask(IRQ_HARDDISK, true);
+    set_interrupt_handler(IRQ_HARDDISK2, ide_handler);
+    set_interrupt_mask(IRQ_HARDDISK2, true);
+    // 打开屏蔽字
+    // 屏蔽字可用来暂停对某些中断的响应
+    set_interrupt_mask(IRQ_CASCADE, true);
 }

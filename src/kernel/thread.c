@@ -47,8 +47,9 @@ static void user_init_thread() {
 }
 
 void init_thread() {
-    // set_interrupt_state(true);
     char temp[100];
+    set_interrupt_state(true);
+    test();
     task_to_user_mode(user_init_thread);
 }
 
