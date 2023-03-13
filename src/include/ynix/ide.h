@@ -14,6 +14,10 @@ typedef struct ide_disk_t {
     struct ide_ctrl_t* ctrl; // 控制器指针
     u8 selector;             // 磁盘选择
     bool master;             // 是否为主盘
+    u32 total_lba;           // 可用扇区数量
+    u32 cylinders;           // 柱面数
+    u32 heads;               // 磁头数
+    u32 sectors;             // 扇区数
 } ide_disk_t;
 
 typedef struct ide_ctrl_t {
@@ -22,6 +26,7 @@ typedef struct ide_ctrl_t {
     u16 iobase;
     ide_disk_t disks[IDE_DISK_NR];
     ide_disk_t* active;    // 当前选择的磁盘
+    u8 control;            // 控制字节
     struct task_t* waiter; // 等待控制器唤醒的进程
 } ide_ctrl_t;
 

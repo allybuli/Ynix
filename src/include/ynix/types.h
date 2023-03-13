@@ -5,6 +5,10 @@
 #define NULL ((void*)0)
 #define EOS '\0'
 
+#define CONCAT(x, y) x##y
+#define RESERVED_TOKEN(x, y) CONCAT(x, y)
+#define RESERVED RESERVED_TOKEN(reserved, __LINE__)
+
 #ifndef __cplusplus
 #define bool _Bool
 #define true 1
