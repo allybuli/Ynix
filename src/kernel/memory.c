@@ -421,9 +421,9 @@ void page_fault(
 }
 
 page_entry_t* copy_pde() {
-    page_entry_t* pde = alloc_kpage(1);
+    page_entry_t* pde = (page_entry_t*)alloc_kpage(1);
     task_t* task = running_task();
-    memcpy(pde, task->pde, PAGE_SIZE);
+    memcpy(pde, (void*)task->pde, PAGE_SIZE);
     page_entry_t* entry = &pde[ENTRY_SIZE-1];
     entry_init(entry, IDX(pde));
     // 拷贝用户空间页表

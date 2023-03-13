@@ -96,7 +96,7 @@ void kfree(void* ptr) {
     assert(arena->magic == YNIX_MAGIC);
 
     if(arena->large) {
-        free_kpage(arena, arena->free_count);
+        free_kpage((u32)arena, arena->free_count);
         return;
     }
 
@@ -111,6 +111,6 @@ void kfree(void* ptr) {
             list_remove(block);
             assert(!list_search(&arena->desc->free_list, block));
         }
-        free_kpage(arena, 1);
+        free_kpage((u32)arena, 1);
     }
 }

@@ -217,10 +217,10 @@ void task_to_user_mode(target_t target) {
 
     // 创建用户进程虚拟内存位图
     task->vmap = kmalloc(sizeof(bitmap_t));
-    void* buf = alloc_kpage(1);
+    void* buf = (void*)alloc_kpage(1);
     bitmap_init(task->vmap, buf, PAGE_SIZE, KERNEL_MEMORY_SIZE/ PAGE_SIZE);
     // 创建用户进程页目录
-    task->pde = copy_pde();
+    task->pde = (u32)copy_pde();
     set_cr3(task->pde);
 
     u32 addr = (u32)task + PAGE_SIZE;
@@ -313,13 +313,13 @@ pid_t task_fork() {
     memcpy(child->vmap, task->vmap, sizeof(bitmap_t));
 
     // 拷贝虚拟位图缓存
-    void* buf = alloc_kpage(1);
+    void* buf = (void*)alloc_kpage(1);
     // todo free_kpage
     memcpy(buf, task->vmap->bits, PAGE_SIZE);
     child->vmap->bits = buf;
 
     // 拷贝页目录
-    child->pde = copy_pde();
+    child->pde = (u32)copy_pde();
 
     // 构造 child 内核栈
     task_build_stack(child); // ROP
@@ -338,7 +338,7 @@ void task_exit(int status) {
     task->status = status;
 
     free_pde();
-    free_kpage(task->vmap->bits, 1);
+    free_kpage((u32)task->vmap->bits, 1);
     kfree(task->vmap);
 
     // 0号进程是基本进程(空转)
