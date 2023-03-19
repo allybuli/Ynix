@@ -45,6 +45,7 @@ $(BUILD)/kernel.bin: \
 	$(BUILD)/kernel/gate.o \
 	$(BUILD)/kernel/syscall.o \
 	$(BUILD)/kernel/list.o \
+	$(BUILD)/kernel/fifo.o \
 	$(BUILD)/kernel/thread.o \
 	$(BUILD)/kernel/mutex.o \
 	$(BUILD)/kernel/keyboard.o \

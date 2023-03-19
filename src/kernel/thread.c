@@ -42,7 +42,7 @@ static void user_init_thread() {
         //     sleep(1000);
         //     exit(0);
         // }
-        sleep(2000);
+        // sleep(2000);
     }
 }
 
@@ -51,13 +51,18 @@ void init_thread() {
     task_to_user_mode(user_init_thread);
 }
 
+extern u32 keyboard_read(char *buf, u32 count);
+
 void test_thread() {
     set_interrupt_state(true);
     u32 counter = 0;
-
+    char ch;
     while(true) {
         // LOGK("test task %d %d %d\n", counter++, getpid(), getppid());
-
-        sleep(1000);
+        bool intr = interrupt_disable();
+        keyboard_read(&ch, 1);
+        printk("%c", ch);
+        set_interrupt_state(intr);
+        // sleep(1000);
     }
 }
