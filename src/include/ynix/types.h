@@ -43,5 +43,6 @@ typedef enum std_fd_t {
 } std_fd_t;
 
 typedef int32 pid_t;
+typedef int32 dev_t;
 
 #endif

@@ -8,6 +8,7 @@
 #include "../include/ynix/memory.h"
 #include "../include/ynix/ide.h"
 #include "../include/ynix/string.h"
+#include "../include/ynix/device.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -30,22 +31,23 @@ static void sys_default() {
 extern ide_ctrl_t controllers[2];
 
 static u32 sys_test() {    
-    u16 *buf = (u16 *)alloc_kpage(1);
-    LOGK("pio read buffer 0x%p\n", buf);
-    ide_disk_t *disk = &controllers[0].disks[0];
-    ide_pio_read(disk, buf, 4, 0);
+    char ch;
+    device_t* device;
+    device = device_find(DEV_KEYBOARD, 0);
+    assert(device);
+    device_read(device->dev, &ch, 1, 0, 0);
 
-    memset(buf, 0x5a, 512);
-
-    ide_pio_write(disk, buf, 1, 1);
-
-    free_kpage((u32)buf, 1);
+    device = device_find(DEV_CONSOLE, 0);
+    assert(device);
+    device_write(device->dev, &ch, 1, 0, 0);
     return 255;
 }
 
+extern int32 console_write();
+
 static u32 sys_write(fd_t fd, char* buf, u32 len) {
     if(stdout == fd || stderr == fd) {
-        return console_write(buf, len);
+        return console_write(NULL, buf, len);
     }
     panic("write!!!");
     return 0;
