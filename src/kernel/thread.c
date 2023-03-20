@@ -55,9 +55,9 @@ extern u32 keyboard_read(char *buf, u32 count);
 
 void test_thread() {
     set_interrupt_state(true);
-    u32 counter = 0;
-    char ch;
+    test();
+    LOGK("test finished of task %d\n", getpid());
     while(true) {
-        test();
+        sleep(10);
     }
 }
