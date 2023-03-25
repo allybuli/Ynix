@@ -29,6 +29,9 @@ enum device_subtype_t {
 #define REQ_READ 0  // 块设备读
 #define REQ_WRITE 1 // 块设备写
 
+#define DIRECT_UP 0   // 上楼
+#define DIRECT_DOWN 1 // 下楼
+
 // 块设备请求
 typedef struct request_t
 {
@@ -50,6 +53,7 @@ typedef struct device_t {
     dev_t parent;
     void *ptr;            // 设备指针
     list_t request_list;  // 块设备请求链表
+    bool direct;         // 磁盘寻道方向
     // 设备控制
     int (*ioctl)(void *dev, int cmd, void *args, int flags);
     // 读设备

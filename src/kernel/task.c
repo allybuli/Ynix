@@ -107,20 +107,7 @@ void task_sleep(u32 ms) {
     cur->ticks = jiffies + ticks;
     
     // 将任务插入睡眠链表
-    list_t* list = &sleep_list;
-    list_node_t* target_node = &list->tail;
-    for(list_node_t* ptr = list->head.next; ptr != &list->tail; ptr = ptr->next) {
-        task_t* task = element_entry(task_t, node, ptr);
-        if(task->ticks > cur->ticks) {
-            target_node = ptr;
-            break;
-        }
-    }
-
-    assert(cur->node.next == NULL);
-    assert(cur->node.prev == NULL);
-
-    list_insert_before(target_node, &cur->node);
+    list_insert_sort(&sleep_list, &cur->node, element_node_offset(task_t, node, ticks));
 
     cur->state = TASK_SLEEPING;
     schedule();
@@ -394,7 +381,7 @@ void task_init() {
 
     idle_task = task_create(idle_thread, "idle", 1, KERNEL_USER);
     task_create(init_thread, "init", 5, NORMAL_USER);
-    task_create(test_thread, "test", 5, KERNEL_USER);
-    task_create(test_thread, "test", 5, KERNEL_USER);    
-    task_create(test_thread, "test", 5, KERNEL_USER);
+    task_create(test_thread, "test", 5, 1);
+    task_create(test_thread, "test", 5, 5);    
+    task_create(test_thread, "test", 5, 3);
 }
