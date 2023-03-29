@@ -474,7 +474,7 @@ static void ide_install() {
             if(!disk->total_lba) {
                 continue;
             }
-            dev_t dev = device_install(DEV_BLOCK, DEV_IDE_DISK, disk, disk->name, 0, ide_pio_ioctl, ide_pio_read, ide_pio_part_write);
+            dev_t dev = device_install(DEV_BLOCK, DEV_IDE_DISK, disk, disk->name, 0, ide_pio_ioctl, ide_pio_read, ide_pio_write);
             for(size_t pidx = 0; pidx < IDE_PART_NR; pidx++) {
                 ide_part_t* part = &disk->parts[pidx];
                 if(!part->count) {
