@@ -9,6 +9,7 @@
 #include "../include/ynix/ide.h"
 #include "../include/ynix/string.h"
 #include "../include/ynix/device.h"
+#include "../include/ynix/buffer.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -33,20 +34,17 @@ extern ide_ctrl_t controllers[2];
 static u32 sys_test() {    
     char ch;
     device_t* device;
-    // device = device_find(DEV_KEYBOARD, 0);
-    // assert(device);
-    // device_read(device->dev, &ch, 1, 0, 0);
 
-    // device = device_find(DEV_CONSOLE, 0);
-    // assert(device);
-    // device_write(device->dev, &ch, 1, 0, 0);
-
-    void* buf = (void*)alloc_kpage(1);
-    device = device_find(DEV_IDE_PART, 0);
+    device = device_find(DEV_IDE_DISK, 0);
     assert(device);
-    memset(buf, running_task()->uid, 512);    
-    device_request(device->dev, buf, 1, running_task()->uid, 0, REQ_WRITE);
-    free_kpage((u32)buf, 1);
+
+    // 读主引导块
+    buffer_t* buf = bread(device->dev, 0);
+
+    char* data = buf->data + SECTOR_SIZE;
+    memset(data, 0x5a, SECTOR_SIZE);
+    buf->dirty = true;
+    brelse(buf);
     return 255;
 }
 

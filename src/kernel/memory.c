@@ -27,9 +27,11 @@
 static u32 KERNEL_PAGE_TABLE[] = {
     0x2000,
     0x3000,
+    0x4000,
+    0x5000,
 };
 
-#define KERNEL_MAP_BITS 0x4000
+#define KERNEL_MAP_BITS 0x6000
 
 #define PDE_MASK 0xFFFFF000
 #define PTE_MASK 0xFFC00000
@@ -456,7 +458,7 @@ void free_pde() {
     assert(task->uid != KERNEL_USER);
 
     page_entry_t* pde = get_pde();
-    for(size_t pde_idx = 2; pde_idx < ENTRY_SIZE - 1; pde_idx++) {
+    for(size_t pde_idx = sizeof(KERNEL_PAGE_TABLE) / sizeof(KERNEL_PAGE_TABLE[0]); pde_idx < ENTRY_SIZE - 1; pde_idx++) {
         page_entry_t* dentry = &pde[pde_idx];
         if(!dentry->present) {
             continue;
@@ -483,7 +485,7 @@ int32 sys_brk(void* addr) {
     
     task_t* task = running_task();
     assert(task->uid != KERNEL_USER);
-    assert(KERNEL_MEMORY_SIZE < brk && brk < USER_STACK_BOTTOM);
+    assert(KERNEL_MEMORY_SIZE <= brk && brk < USER_STACK_BOTTOM);
 
     u32 old_brk = task->brk;
     if(old_brk > brk) {

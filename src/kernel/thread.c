@@ -27,22 +27,6 @@ void test_recursion() {
 static void user_init_thread() {
     u32 counter = 0;
     while(true) {
-        // test();
-        // test_recursion();
-        // printf("user mode %d %d %d\n", counter ++, getpid(), getppid());
-        // pid_t pid = fork();
-        // if(pid) {
-        //     printf("father thread %d %d %d\n", pid, getpid(), getppid());
-        //     int status = 0;
-        //     // sleep(1000);
-        //     pid_t child = waitpid(pid, &status);
-        //     printf("wait pid %d status %d %d\n", child, status, counter++);
-        // } else {
-        //     printf("child thread %d %d %d\n", pid, getpid(), getppid());
-        //     sleep(1000);
-        //     exit(0);
-        // }
-        // sleep(2000);
     }
 }
 
@@ -56,7 +40,6 @@ extern u32 keyboard_read(char *buf, u32 count);
 void test_thread() {
     set_interrupt_state(true);
     test();
-    LOGK("test finished of task %d\n", getpid());
     while(true) {
         sleep(10);
     }
