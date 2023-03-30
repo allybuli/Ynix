@@ -67,7 +67,7 @@ $(BUILD)/system.bin: $(BUILD)/kernel.bin
 $(BUILD)/system.map: $(BUILD)/kernel.bin
 	nm $< | sort > $@
 
-include utils/image.mkdir
+include utils/image.mk
 include utils/cmd.mk
 
 .PHONY: clean
