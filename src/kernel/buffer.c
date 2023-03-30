@@ -25,7 +25,7 @@ static list_t wait_list;  // 等待进程链表
 static list_t hash_table[HASH_COUNT];  // 哈希表，存放缓冲块
 
 u32 hash(dev_t dev, idx_t block) {
-    return (dev ^ block) & HASH_COUNT;
+    return (dev ^ block) % HASH_COUNT;
 }
 
 // 将缓冲块放入哈希表
