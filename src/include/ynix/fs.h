@@ -2,6 +2,7 @@
 #define YNIX_FS_H
 
 #include "types.h"
+#include "buffer.h"
 
 #define BLOCK_SIZE 1024 // 块大小(两个扇区大小)
 #define SECTOR_SIZE 512 // 扇区大小
@@ -9,9 +10,10 @@
 #define MINIX1_MAGIC 0x137F // 文件系统魔数
 #define NAME_LEN 14        // 文件名长度
 
-#define IMAP_NR 8
-#define ZMAP_NR 8
+#define IMAP_NR 8      // indoe位图最大块数
+#define ZMAP_NR 8      // 块位图最大块数
 
+// 磁盘上的数据结构
 typedef struct inode_desc_t {
     u16 mode;    // 文件类型和属性（rwx位）
     u16 uid;     // 用户id（文件拥有者标识符）
@@ -22,6 +24,19 @@ typedef struct inode_desc_t {
     u16 zone[9]; // 文件逻辑块,直接(0-6),间接(7),双重间接(8)
 } inode_desc_t;
 
+// 内存中的数据结构
+typedef struct inode_t {
+    inode_desc_t* desc;
+    struct buffer_t* buf;
+    dev_t dev;   // 设备号
+    idx_t nr;    // inode节点下标
+    u32 count;   // 引用计数
+    // 记录修改时间，创建时间的数据结构 todo
+    list_node_t node;
+    dev_t mount; // 安装设备号
+} inode_t;
+
+// 磁盘上的数据结构
 typedef struct super_desc_t {
     u16 inodes;          // inode节点数
     u16 zones;           // 逻辑块数
@@ -33,10 +48,24 @@ typedef struct super_desc_t {
     u16 magic;           // 文件系统魔数
 } super_desc_t;
 
+// 内存中的数据结构
+typedef struct super_block_t {
+    super_desc_t* desc;
+    struct buffer_t* buf;
+    struct buffer_t* imaps[IMAP_NR];
+    struct buffer_t* zmaps[ZMAP_NR];
+    dev_t dev;
+    list_t inode_list;
+    inode_t* iroot;
+    inode_t* imount;
+} super_block_t;
+
 typedef struct dentry_t {
     u16 nr;           // 节点
     char name[14];    // 文件名
 };
 
+// super_block_t* get_super(dev_t dev);
+super_block_t* read_super(dev_t dev);
 
 #endif
