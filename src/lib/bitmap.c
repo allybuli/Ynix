@@ -2,7 +2,7 @@
 #include "../include/ynix/string.h"
 #include "../include/ynix/assert.h"
 
-static void bitmap_make(bitmap_t* map, char* bits, u32 length, u32 offset) {
+void bitmap_make(bitmap_t* map, char* bits, u32 length, u32 offset) {
     map->bits = bits;
     map->length = length;
     map->offset = offset;

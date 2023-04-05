@@ -13,6 +13,9 @@
 #define IMAP_NR 8      // indoe位图最大块数
 #define ZMAP_NR 8      // 块位图最大块数
 
+// 块位图 位大小(一字节8位)
+#define BLOCK_BITS (BLOCK_SIZE * 8)
+
 // 磁盘上的数据结构
 typedef struct inode_desc_t {
     u16 mode;    // 文件类型和属性（rwx位）
@@ -63,9 +66,18 @@ typedef struct super_block_t {
 typedef struct dentry_t {
     u16 nr;           // 节点
     char name[14];    // 文件名
-};
+} dentry_t;
 
-// super_block_t* get_super(dev_t dev);
+super_block_t* get_super(dev_t dev);
 super_block_t* read_super(dev_t dev);
+
+// 分配一个文件块
+idx_t balloc(dev_t dev);
+// 释放一个文件块
+void bfree(dev_t dev, idx_t idx);
+// 分配一个文件系统 inode
+idx_t ialloc(dev_t dev);
+// 释放一个文件系统 inode
+void ifree(dev_t dev, idx_t idx); 
 
 #endif

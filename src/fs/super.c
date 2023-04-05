@@ -21,7 +21,7 @@ static super_block_t* get_free_super() {
     panic("no more super block!!!");
 }
 
-static super_block_t* get_super(dev_t dev) {
+super_block_t* get_super(dev_t dev) {
     for(size_t i = 0; i < SUPER_NR; i++) {
         if(dev == super_table[i].dev) {
             return &super_table[i];
@@ -41,7 +41,7 @@ super_block_t* read_super(dev_t dev) {
     sb = get_free_super();
     buffer_t* buf = bread(dev, 1);
     sb->buf;
-    sb->desc = (super_block_t*)buf->data;
+    sb->desc = (super_desc_t*)buf->data;
     sb->dev = dev;
     assert(MINIX1_MAGIC == sb->desc->magic);
 
@@ -77,7 +77,17 @@ static void mount_root() {
     assert(device);
 
     root = read_super(device->dev);
-}
+    
+    device = device_find(DEV_IDE_PART, 1);
+    assert(device);
+    super_block_t* sb = read_super(device->dev);
+
+    idx_t idx = ialloc(sb->dev);
+    ifree(sb->dev, idx);
+
+    idx = balloc(sb->dev);
+    bfree(sb->dev, idx);
+}   
 
 void super_init() {
     for(size_t i = 0; i < SUPER_NR; i++) {
