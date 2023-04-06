@@ -79,3 +79,7 @@ void exit() {
 pid_t waitpid(pid_t pid, int32* status) {
     return _syscall2(SYS_NR_WAITPID, pid, (u32)status);
 }
+
+mode_t umask(mode_t mask) {
+    return _syscall1(SYS_NR_UMASK, (u32)mask);
+}

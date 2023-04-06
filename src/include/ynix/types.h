@@ -44,5 +44,6 @@ typedef enum std_fd_t {
 
 typedef int32 pid_t;
 typedef int32 dev_t;
+typedef u16 mode_t;  // 文件权限
 
 #endif

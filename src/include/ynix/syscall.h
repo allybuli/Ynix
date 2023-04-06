@@ -14,6 +14,7 @@ typedef enum syscall_t {
     SYS_NR_FORK,
     SYS_NR_EXIT,
     SYS_NR_WAITPID,
+    SYS_NR_UMASK,
 } syscall_t;
 
 u32 test();
@@ -26,5 +27,6 @@ pid_t getppid();
 pid_t fork();
 void exit();
 pid_t waitpid(pid_t, int32*);
+mode_t umask(mode_t mask);
 
 #endif
