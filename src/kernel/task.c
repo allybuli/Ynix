@@ -12,6 +12,7 @@
 #include "../include/ynix/list.h"
 #include "../include/ynix/global.h"
 #include "../include/ynix/arena.h"
+#include "../include/ynix/fs.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -192,6 +193,8 @@ static task_t *task_create(target_t target, const char *name, u32 priority, u32 
     task->vmap = &kernel_map;
     task->pde = KERNEL_PAGE_DIR;
     task->brk = KERNEL_MEMORY_SIZE; // todo
+    task->iroot = get_root_inode();
+    task->ipwd = get_root_inode();
     task->magic = YNIX_MAGIC;
 
     return task;

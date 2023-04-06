@@ -16,6 +16,23 @@
 // 块位图 位大小(一字节8位)
 #define BLOCK_BITS (BLOCK_SIZE * 8)
 
+// 块 inode 数量
+#define BLOCK_INODES (BLOCK_SIZE / sizeof(inode_desc_t)) 
+// 块 dentry 数量
+#define BLOCK_DENTRIES (BLOCK_SIZE / sizeof(dentry_t))
+// 块索引数量
+#define BLOCK_INDEXES (BLOCK_SIZE / sizeof(u16))
+
+// 一个文件inode所能管理的文件块
+// 直接块数量
+#define DIRECT_BLOCK (7)
+// 一级间接块数量
+#define INDIRECT1_BLOCK BLOCK_INDEXES
+// 二级间接块数量                  
+#define INDIRECT2_BLOCK (INDIRECT1_BLOCK * INDIRECT1_BLOCK)
+// 全部块数量
+#define TOTAL_BLOCK (DIRECT_BLOCK + INDIRECT1_BLOCK + INDIRECT2_BLOCK) 
+
 // 磁盘上的数据结构
 typedef struct inode_desc_t {
     u16 mode;    // 文件类型和属性（rwx位）
@@ -28,6 +45,7 @@ typedef struct inode_desc_t {
 } inode_desc_t;
 
 // 内存中的数据结构
+// {dev, nr} 唯一确定一个inode
 typedef struct inode_t {
     inode_desc_t* desc;
     struct buffer_t* buf;
@@ -58,9 +76,9 @@ typedef struct super_block_t {
     struct buffer_t* imaps[IMAP_NR];
     struct buffer_t* zmaps[ZMAP_NR];
     dev_t dev;
-    list_t inode_list;
-    inode_t* iroot;
-    inode_t* imount;
+    list_t inode_list;// 使用中 inode 链表
+    inode_t* iroot;   // 根目录 inode
+    inode_t* imount;  // 安装到的 inode
 } super_block_t;
 
 typedef struct dentry_t {
@@ -80,4 +98,15 @@ idx_t ialloc(dev_t dev);
 // 释放一个文件系统 inode
 void ifree(dev_t dev, idx_t idx); 
 
+
+// 获取 inode 第 block 块的索引值
+// 如果不存在 且 create 为 true，则创建
+idx_t bmap(inode_t *inode, idx_t block, bool create);
+
+// 获取根目录 inode
+inode_t *get_root_inode();
+// 获得设备 dev 的 nr inode
+inode_t *iget(dev_t dev, idx_t nr);
+// 释放 inode
+void iput(inode_t *inode);
 #endif
