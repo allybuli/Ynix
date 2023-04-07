@@ -31,7 +31,14 @@
 // 二级间接块数量                  
 #define INDIRECT2_BLOCK (INDIRECT1_BLOCK * INDIRECT1_BLOCK)
 // 全部块数量
-#define TOTAL_BLOCK (DIRECT_BLOCK + INDIRECT1_BLOCK + INDIRECT2_BLOCK) 
+#define TOTAL_BLOCK (DIRECT_BLOCK + INDIRECT1_BLOCK + INDIRECT2_BLOCK)
+
+// 目录分隔符 1
+#define SEPARATOR1 '/'
+// 目录分隔符 2
+#define SEPARATOR2 '\\'
+// 字符是否位目录分隔符
+#define IS_SEPARATOR(c) (c == SEPARATOR1 || c == SEPARATOR2)
 
 // 磁盘上的数据结构
 typedef struct inode_desc_t {

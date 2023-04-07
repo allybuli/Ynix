@@ -84,6 +84,10 @@ void iput(inode_t *inode) {
     if(!inode) {
         return;
     }
+    if(inode->buf->dirty) {
+        // 目录新增子目录
+        bwrite(inode->buf);
+    }
     inode->count --;
     if(inode->count) {
         return;
