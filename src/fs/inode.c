@@ -1,5 +1,8 @@
 #include "../include/ynix/fs.h"
 #include "../include/ynix/assert.h"
+#include "../include/ynix/stdlib.h"
+#include "../include/ynix/string.h"
+#include "../include/ynix/stat.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -108,4 +111,134 @@ void inode_init() {
         inode_t* inode = &inode_table[i];
         inode->dev = EOF;
     }
+}
+
+// 从 inode 的 offset 处，读 len 个字节到 buf
+int inode_read(inode_t *inode, char *buf, u32 len, off_t offset) {
+    assert(ISFILE(inode->desc->mode) || ISDIR(inode->desc->mode));
+
+    if(offset >= inode->desc->size) {
+        return EOF;
+    }
+    u32 begin = offset;
+    u32 left = MIN(len, inode->desc->size - offset);
+    while(left) {
+        // 找到对应文件偏移，文件块
+        idx_t nr = bmap(inode, offset / BLOCK_SIZE, false);
+        assert(nr);
+        // 读取文件缓冲块
+        buffer_t* bf = bread(inode->dev, nr);
+        // 文件块中的偏移
+        u32 start = offset % BLOCK_SIZE;
+
+        //当前块需要读取的字节数
+        u32 chars = MIN(left, BLOCK_SIZE - start);
+
+        offset += chars;
+        left -= chars;
+        // 文件块数据指针
+        char* ptr = bf->data + start;
+
+        memcpy(buf, ptr, chars);
+
+        buf += chars;
+        brelse(bf);
+    }
+    // 返回读取字节数
+    return offset - begin;
+}
+
+// 从 inode 的 offset 处，将 buf 的 len 个字节写入磁盘
+int inode_write(inode_t *inode, char *buf, u32 len, off_t offset) {
+    // 不允许目录写入目录文件，修改目录有其他的专用方法
+    assert(ISFILE(inode->desc->mode));
+    // 开始的位置
+    u32 begin = offset;
+
+    // 剩余数量
+    u32 left = len;
+
+    while (left)
+    {
+        // 找到文件块，若不存在则创建
+        idx_t nr = bmap(inode, offset / BLOCK_SIZE, true);
+        assert(nr);
+
+        // 将读入文件块
+        buffer_t *bf = bread(inode->dev, nr);
+        bf->dirty = true;
+
+        // 块中的偏移量
+        u32 start = offset % BLOCK_SIZE;
+        // 文件块中的指针
+        char *ptr = bf->data + start;
+
+        // 读取的数量
+        u32 chars = MIN(BLOCK_SIZE - start, left);
+
+        // 更新偏移量
+        offset += chars;
+
+        // 更新剩余字节数
+        left -= chars;
+
+        // 如果偏移量大于文件大小，则更新
+        if (offset > inode->desc->size)
+        {
+            inode->desc->size = offset;
+            inode->buf->dirty = true;
+        }
+
+        // 拷贝内容
+        memcpy(ptr, buf, chars);
+
+        // 更新缓存偏移
+        buf += chars;
+
+        // 释放文件块
+        brelse(bf);
+    }
+    // 写入磁盘 ？强同步
+    bwrite(inode->buf);
+
+    // 返回写入大小
+    return offset - begin;
+}
+
+static void inode_bfree(inode_t* inode, u16* array, int index, int level) {
+    if(!array[index]) {
+        return;
+    }
+    if(!level) {
+        bfree(inode->dev, array[index]);
+        return;
+    }
+    buffer_t* buf = bread(inode->dev, array[index]);
+    for(size_t i = 0; i < BLOCK_INDEXES; i++) {
+        inode_bfree(inode, (u16*)buf->data, i, level-1);
+    }
+    brelse(buf);
+    bfree(inode->dev, array[index]);
+}
+
+// 释放 inode 所有文件块
+void inode_truncate(inode_t *inode) {
+    if(!ISFILE(inode->desc->mode) && !ISDIR(inode->desc->mode)) {
+        return;
+    }
+    // 释放直接块
+    for(size_t i = 0; i < DIRECT_BLOCK; i++) {
+        inode_bfree(inode, inode->desc->zone, i, 0);
+        inode->desc->zone[0] = 0;
+    }
+    // 释放一级间接块
+    inode_bfree(inode, inode->desc->zone, DIRECT_BLOCK, 1);
+    inode->desc->zone[DIRECT_BLOCK] = 0;
+    // 释放二级间接块
+    inode_bfree(inode, inode->desc->zone, DIRECT_BLOCK+1, 2);
+    inode->desc->zone[DIRECT_BLOCK+1] = 0;
+
+    inode->desc->size = 0;
+    inode->buf->dirty = true;
+    bwrite(inode->buf);
 }

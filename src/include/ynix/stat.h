@@ -10,7 +10,8 @@
 #define IFDIR 0040000 // 目录文件
 #define IFCHR 0020000 // 字符设备文件
 #define IFIFO 0010000 // FIFO 特殊文件
-#define IFSYM 0120000 // 符号连接
+#define IFLNK 0120000 // 符号连接
+#define IFSOCK 0140000// 套接字
 
 // 文件属性位：
 // ISUID 用于测试文件的 set-user-ID 标志是否置位
@@ -29,6 +30,8 @@
 #define ISBLK(m) (((m)&IFMT) == IFBLK)  // 是块设备文件
 #define ISFIFO(m) (((m)&IFMT) == IFIFO) // 是 FIFO 特殊文件
 #define ISSYM(m) (((m)&IFMT) == IFSYM)  // 是符号连接文件
+#define ISSOCK(m) (((m)&IFMT) == ISSOCK) // 是套接字文件
+#define ISFILE(m) ISREG(m)               // 更直观的一个宏
 
 // 文件访问权限
 #define IRWXU 00700 // 宿主可以读、写、执行/搜索
