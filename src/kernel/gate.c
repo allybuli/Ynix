@@ -31,7 +31,9 @@ static void sys_default() {
 
 extern ide_ctrl_t controllers[2];
 
+extern void dir_test();
 static u32 sys_test() {    
+    dir_test();
     // 读取键盘输入，写到控制台
     char ch;
     device_t* device;

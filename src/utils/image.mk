@@ -40,8 +40,9 @@ $(BUILD)/master.img: $(BUILD)/boot/boot.bin \
 	mkdir -p /mnt/d1/d2/d3/d4
 
 # 创建文件
-	echo "hello onix!!!, from root direcotry file..." > /mnt/hello.txt
-	echo "hello onix!!!, from home direcotry file..." > /mnt/home/hello.txt
+	echo "hello!!!, from root direcotry file..." > /mnt/hello.txt
+	echo "hello!!!, from home direcotry file..." > /mnt/home/hello.txt
+	echo "hello!!!, from d4 direcotry file..." > /mnt/d1/d2/d3/d4/hello.txt
 
 # 卸载文件系统
 	sudo umount /mnt

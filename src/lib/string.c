@@ -146,7 +146,7 @@ char *strrsep(const char *str) {
         if(IS_SEPARATOR(*ptr)) {
             last = ptr;
         }
-        if(EOS == *ptr) {
+        if(EOS == *ptr ++) {
             return last;
         }
     }

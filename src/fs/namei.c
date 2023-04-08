@@ -2,8 +2,14 @@
 #include "../include/ynix/assert.h"
 #include "../include/ynix/stat.h"
 #include "../include/ynix/string.h"
+#include "../include/ynix/task.h"
+#include "../include/ynix/debug.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
+
+#define P_EXEC IXOTH
+#define P_READ IROTH
+#define P_WRITE IWOTH
 
 // 判断文件名是否相等?
 // 判断entry_name是否是name的前缀
@@ -108,4 +114,116 @@ buffer_t *add_entry(inode_t *dir, const char *name, dentry_t **result) {
         *result = entry;
         return buf;
     };
+}
+
+static bool permission(inode_t* inode, u16 mask) {
+    u16 mode = inode->desc->mode;
+
+    if (!inode->desc->nlinks)
+        return false;
+
+    task_t *task = running_task();
+    if (task->uid == KERNEL_USER)
+        return true;
+
+    if (task->uid == inode->desc->uid)
+        mode >>= 6;
+    else if (task->gid == inode->desc->gid)
+        mode >>= 3;
+
+    if ((mode & mask & 0b111) == mask)
+        return true;
+    return false;
+}
+
+// 获取 pathname 对应的父目录 inode
+inode_t *named(char *pathname, char **next) {
+    inode_t* inode = NULL;
+    task_t* task = running_task();
+    char* left = pathname;
+    if(IS_SEPARATOR(left[0])) {
+        inode = task->iroot;
+        left ++;
+    } else if(left[0]) {
+        inode = task->ipwd;
+    } else {
+        return NULL;
+    }
+
+    inode->count ++;
+    *next = left;
+    if(!*left) {
+        return inode;
+    }
+
+    char* right = strrsep(left);
+    if(!right || right < left) {
+        return inode;
+    }
+    right ++;
+
+    *next = left;
+    dentry_t* entry = NULL;
+    buffer_t* buf = NULL;
+    while(true) {
+        buf = find_entry(&inode, left, next, &entry);
+        if(!buf) {
+            goto failure;
+        }
+        dev_t dev= inode->dev;
+        iput(inode);
+        inode = iget(dev, entry->nr);
+        if(!ISDIR(inode->desc->mode) || !permission(inode, P_EXEC)) {
+            goto failure;
+        }
+        if(right == *next) {
+            goto success;
+        }
+        left = *next;
+    }
+success:
+    brelse(buf);
+    return inode;
+failure:
+    brelse(buf);
+    iput(inode);
+    return NULL;
+}
+
+// 获取 pathname 对应的 inode 
+inode_t *namei(char *pathname) {
+    char* next = NULL;
+    inode_t* dir = named(pathname, &next);
+    if(!dir) {
+        return NULL;
+    }
+    if(!(*next)) {
+        return dir;
+    }
+
+    char* name = next;
+    dentry_t* entry = NULL;
+    buffer_t* buf = find_entry(&dir, name, &next, &entry);
+    if(!buf) {
+        iput(dir);
+        return NULL;
+    }
+
+    // 获取目标文件的inode
+    inode_t* inode = iget(dir->dev, entry->nr);
+    iput(dir);
+    brelse(buf);
+    return inode;
+}
+
+void dir_test()
+{
+    char pathname[] = "/";
+    char *name = NULL;
+    inode_t *inode = named(pathname, &name);
+    iput(inode);
+
+    inode = namei("/d1/d2/d3/d4/hello.txt");
+    LOGK("get inode %d\n", inode->nr);
+    iput(inode);
 }
