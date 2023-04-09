@@ -266,6 +266,29 @@ pid_t sys_getppid() {
     return task->ppid;
 }
 
+// 获取一个未使用的文件描述符（进程文件表下标）
+fd_t task_get_fd(task_t* task) {
+    fd_t i;
+    for(i = 3; i < TASK_FILE_NR; i++) {
+        if(!task->files[i]) {
+            break;
+        }
+    }
+    if(i == TASK_FILE_NR) {
+        panic("can't open more files.");
+    }
+    return i;
+}
+
+// 释放一个文件描述符
+void task_put_fd(task_t* task, fd_t fd) {
+    if(fd < 3) {
+        return;
+    }
+    assert(fd < TASK_FILE_NR);
+    task->files[fd] = NULL;
+}
+
 extern void interrupt_exit();
 
 static void task_build_stack(task_t* task) {

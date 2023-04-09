@@ -39,10 +39,8 @@ extern u32 keyboard_read(char *buf, u32 count);
 
 void test_thread() {
     set_interrupt_state(true);
-    // test();
-    link("/hello.txt", "/world.txt");
-    unlink("/hello.txt");
     while(true) {
+        test();
         sleep(10);
     }
 }

@@ -27,6 +27,7 @@ extern void ide_init();
 extern void buffer_init();
 extern void super_init();
 extern void inode_init();
+extern void file_init();
 
 void kernel_init() {
     tss_init();
@@ -40,6 +41,7 @@ void kernel_init() {
     syscall_init();
     inode_init();
     super_init();
+    file_init();
 
     set_interrupt_state(true);
     return;
