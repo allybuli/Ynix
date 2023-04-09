@@ -91,3 +91,11 @@ int mkdir(char *pathname, int mode) {
 int rmdir(char *pathname) {
     return _syscall1(SYS_NR_RMDIR, (u32)pathname);
 }
+
+int link(char *oldname, char *newname) {
+    return _syscall2(SYS_NR_LINK, (u32)oldname, (u32)newname);
+}
+
+int unlink(char *filename) {
+    return _syscall1(SYS_NR_UNLINK, (u32)filename);
+}

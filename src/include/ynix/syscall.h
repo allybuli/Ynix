@@ -17,6 +17,8 @@ typedef enum syscall_t {
     SYS_NR_UMASK,
     SYS_NR_MKDIR,
     SYS_NR_RMDIR,
+    SYS_NR_LINK,
+    SYS_NR_UNLINK,
 } syscall_t;
 
 u32 test();
@@ -32,5 +34,7 @@ pid_t waitpid(pid_t, int32*);
 mode_t umask(mode_t mask);
 int mkdir(char *pathname, int mode);
 int rmdir(char *pathname);
+int link(char *oldname, char *newname);
+int unlink(char *filename);
 
 #endif
