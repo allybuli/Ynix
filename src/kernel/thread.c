@@ -39,7 +39,9 @@ extern u32 keyboard_read(char *buf, u32 count);
 
 void test_thread() {
     set_interrupt_state(true);
-    test();
+    // test();
+    mkdir("/world", 0755);
+    // rmdir("/empty");
     while(true) {
         sleep(10);
     }

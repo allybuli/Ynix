@@ -61,6 +61,8 @@ static u32 sys_write(fd_t fd, char* buf, u32 len) {
 
 extern void task_yield();
 extern void sys_umask();
+extern void sys_mkdir();
+extern void sys_rmdir();
 
 void syscall_init() {
     gate_t* gate = &idt[0x80];
@@ -87,4 +89,6 @@ void syscall_init() {
     syscall_table[SYS_NR_EXIT] = task_exit;
     syscall_table[SYS_NR_WAITPID] = task_waitpid;
     syscall_table[SYS_NR_UMASK] = sys_umask;
+    syscall_table[SYS_NR_MKDIR] = sys_mkdir;
+    syscall_table[SYS_NR_RMDIR] = sys_rmdir;
 }

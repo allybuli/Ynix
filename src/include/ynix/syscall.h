@@ -15,6 +15,8 @@ typedef enum syscall_t {
     SYS_NR_EXIT,
     SYS_NR_WAITPID,
     SYS_NR_UMASK,
+    SYS_NR_MKDIR,
+    SYS_NR_RMDIR,
 } syscall_t;
 
 u32 test();
@@ -28,5 +30,7 @@ pid_t fork();
 void exit();
 pid_t waitpid(pid_t, int32*);
 mode_t umask(mode_t mask);
+int mkdir(char *pathname, int mode);
+int rmdir(char *pathname);
 
 #endif
