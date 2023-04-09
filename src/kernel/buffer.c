@@ -106,7 +106,7 @@ static buffer_t* get_free_buffer() {
 buffer_t *getblk(dev_t dev, idx_t block) {
     buffer_t* bf = get_from_hash_table(dev, block);
     if(bf) {
-        assert(bf->valid);
+        bf->count ++;
         return bf;
     }
     bf = get_free_buffer();
@@ -125,12 +125,16 @@ buffer_t *bread(dev_t dev, idx_t block) {
     buffer_t* buffer = getblk(dev, block);
     assert(buffer);
     if(buffer->valid) {
-        buffer->count ++;
         return buffer;
     }
-    device_request(buffer->dev, buffer->data, BLOCK_SECS, buffer->block * BLOCK_SECS, 0, REQ_READ);
-    buffer->dirty = false;
-    buffer->valid = true;
+    // 可能存在多个进程同时并发的读，需互斥
+    lock_acquire(&buffer->lock);
+    if(!buffer->valid) {
+        device_request(buffer->dev, buffer->data, BLOCK_SECS, buffer->block * BLOCK_SECS, 0, REQ_READ);
+        buffer->dirty = false;
+        buffer->valid = true;        
+    }
+    lock_release(&buffer->lock);
     return buffer;
 }
 
