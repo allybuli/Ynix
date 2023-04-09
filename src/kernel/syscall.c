@@ -99,3 +99,15 @@ int link(char *oldname, char *newname) {
 int unlink(char *filename) {
     return _syscall1(SYS_NR_UNLINK, (u32)filename);
 }
+
+fd_t open(char* pathname, int flags, int mode) {
+    return _syscall3(SYS_NR_OPEN, (u32)pathname, flags, mode);
+}
+
+fd_t creat(char* pathname, int mode) {
+    return _syscall2(SYS_NR_CREAT, (u32)pathname, mode);
+}
+
+void close(fd_t fd) {
+    _syscall1(SYS_NR_CLOSE, fd);
+}

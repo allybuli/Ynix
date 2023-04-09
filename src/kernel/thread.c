@@ -5,6 +5,7 @@
 #include "../include/ynix/task.h"
 #include "../include/ynix/stdio.h"
 #include "../include/ynix/arena.h"
+#include "../include/ynix/fs.h"
 
 #define LOGK(fmt, args...) DEBUGK(fmt, ##args)
 
@@ -26,6 +27,8 @@ void test_recursion() {
 
 static void user_init_thread() {
     u32 counter = 0;
+    fd_t fd = open("/yyy.c", O_CREAT, 0755);
+    close(fd);
     while(true) {
     }
 }
@@ -40,7 +43,7 @@ extern u32 keyboard_read(char *buf, u32 count);
 void test_thread() {
     set_interrupt_state(true);
     while(true) {
-        test();
+        // test();
         sleep(10);
     }
 }

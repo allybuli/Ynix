@@ -65,6 +65,9 @@ extern void sys_mkdir();
 extern void sys_rmdir();
 extern void sys_link();
 extern void sys_unlink();
+extern fd_t sys_open();
+extern fd_t sys_creat();
+extern void sys_close();
 
 void syscall_init() {
     gate_t* gate = &idt[0x80];
@@ -95,4 +98,7 @@ void syscall_init() {
     syscall_table[SYS_NR_RMDIR] = sys_rmdir;
     syscall_table[SYS_NR_LINK] = sys_link;
     syscall_table[SYS_NR_UNLINK] = sys_unlink;
+    syscall_table[SYS_NR_OPEN] = sys_open;
+    syscall_table[SYS_NR_CREAT] = sys_creat;
+    syscall_table[SYS_NR_CLOSE] = sys_close;
 }

@@ -19,6 +19,9 @@ typedef enum syscall_t {
     SYS_NR_RMDIR,
     SYS_NR_LINK,
     SYS_NR_UNLINK,
+    SYS_NR_OPEN,
+    SYS_NR_CREAT,
+    SYS_NR_CLOSE,
 } syscall_t;
 
 u32 test();
@@ -36,5 +39,8 @@ int mkdir(char *pathname, int mode);
 int rmdir(char *pathname);
 int link(char *oldname, char *newname);
 int unlink(char *filename);
+fd_t open(char* pathname, int flags, int mode);
+fd_t creat(char* pathname, int mode);
+void close(fd_t fd);
 
 #endif
