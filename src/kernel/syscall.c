@@ -52,7 +52,11 @@ void sleep(u32 ms) {
     _syscall1(SYS_NR_SLEEP, ms);
 }
 
-int32 write(fd_t fd, char* buf, u32 len) {
+int read(fd_t fd, char* buf, int len) {
+    return _syscall3(SYS_NR_READ, fd, (u32)buf, len);
+}
+
+int write(fd_t fd, char* buf, int len) {
     return _syscall3(SYS_NR_WRITE, fd, (u32)buf, len);
 }
 

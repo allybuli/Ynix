@@ -6,6 +6,7 @@
 typedef enum syscall_t {
     SYS_NR_TEST,
     SYS_NR_BRK,
+    SYS_NR_READ,
     SYS_NR_WRITE,
     SYS_NR_SLEEP,
     SYS_NR_YIELD,
@@ -27,7 +28,10 @@ typedef enum syscall_t {
 u32 test();
 void yield();
 void sleep(u32 ms);
-int32 write(fd_t, char*, u32);
+// 读文件
+int read(fd_t fd, char *buf, int len);
+// 写文件
+int write(fd_t fd, char *buf, int len);
 int32 brk(void*);
 pid_t getpid();
 pid_t getppid();
