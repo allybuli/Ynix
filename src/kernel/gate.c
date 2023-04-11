@@ -62,7 +62,7 @@ extern fd_t sys_creat();
 extern void sys_close();
 extern int sys_read();
 extern int sys_write();
-
+extern int sys_lseek();
 
 void syscall_init() {
     gate_t* gate = &idt[0x80];
@@ -83,6 +83,7 @@ void syscall_init() {
     syscall_table[SYS_NR_YIELD] = task_yield;
     syscall_table[SYS_NR_READ] = sys_read;
     syscall_table[SYS_NR_WRITE] = sys_write;
+    syscall_table[SYS_NR_LSEEK] = sys_lseek;
     syscall_table[SYS_NR_BRK] = sys_brk;
     syscall_table[SYS_NR_GETPID] = sys_getpid;
     syscall_table[SYS_NR_GETPPID] = sys_getppid;

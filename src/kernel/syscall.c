@@ -60,6 +60,10 @@ int write(fd_t fd, char* buf, int len) {
     return _syscall3(SYS_NR_WRITE, fd, (u32)buf, len);
 }
 
+int lseek(fd_t fd, off_t offset, int whence) {
+    return _syscall3(SYS_NR_LSEEK, fd, offset, whence);
+}
+
 int32 brk(void* addr) {
     return _syscall1(SYS_NR_BRK, (u32)addr);
 }

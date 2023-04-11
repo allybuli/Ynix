@@ -23,6 +23,7 @@ typedef enum syscall_t {
     SYS_NR_OPEN,
     SYS_NR_CREAT,
     SYS_NR_CLOSE,
+    SYS_NR_LSEEK,
 } syscall_t;
 
 u32 test();
@@ -32,6 +33,8 @@ void sleep(u32 ms);
 int read(fd_t fd, char *buf, int len);
 // 写文件
 int write(fd_t fd, char *buf, int len);
+// 设置文件偏移量
+int lseek(fd_t fd, off_t offset, int whence);
 int32 brk(void*);
 pid_t getpid();
 pid_t getppid();

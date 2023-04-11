@@ -113,6 +113,35 @@ int sys_write(unsigned int fd, char* buf, int count) {
     return len;
 }
 
+int sys_lseek(fd_t fd, off_t offset, int whence) {
+    assert(fd < TASK_FILE_NR);
+
+    task_t* task = running_task();
+    file_t* file = task->files[fd];
+
+    assert(file);
+    assert(file->inode);
+
+    switch(whence) {
+    case SEEK_SET:
+        assert(offset >= 0);
+        file->offset = offset;
+        break;
+    case SEEK_CUR:
+        assert(file->offset + offset >= 0);
+        file->offset += offset;
+        break;
+    case SEEK_END:
+        assert(file->inode->desc->size + offset >= 0);
+        file->offset = file->inode->desc->size + offset;
+        break;
+    default:
+        panic("whence not defined !!!");
+        break;
+    }
+    return file->offset;
+}
+
 void file_init() {
     for(size_t i = 0; i < FILE_NR; i++) {
         file_t* file = &file_table[i];

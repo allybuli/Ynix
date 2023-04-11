@@ -54,6 +54,13 @@ enum file_flag
     O_NONBLOCK = 04000, // 非阻塞方式打开和操作文件
 };
 
+typedef enum whence_t
+{
+    SEEK_SET = 1, // 直接设置偏移
+    SEEK_CUR,     // 当前位置偏移
+    SEEK_END      // 结束位置偏移
+} whence_t;
+
 // 磁盘上的数据结构
 typedef struct inode_desc_t {
     u16 mode;    // 文件类型和属性（rwx位）
