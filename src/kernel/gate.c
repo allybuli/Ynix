@@ -66,6 +66,7 @@ extern int sys_lseek();
 extern char* sys_getcwd();
 extern int sys_chdir();
 extern int sys_chroot();
+extern int sys_readdir();
 
 void syscall_init() {
     gate_t* gate = &idt[0x80];
@@ -104,4 +105,6 @@ void syscall_init() {
     syscall_table[SYS_NR_GETCWD] = sys_getcwd;
     syscall_table[SYS_NR_CHDIR] = sys_chdir;
     syscall_table[SYS_NR_CHROOT] = sys_chroot;
+    syscall_table[SYS_NR_READDIR] = sys_readdir;
+    syscall_table[SYS_NR_CLEAR] = console_clear;
 }

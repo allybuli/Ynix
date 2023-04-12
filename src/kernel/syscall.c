@@ -1,4 +1,5 @@
 #include "../include/ynix/syscall.h"
+#include "../include/ynix/fs.h"
 
 static u32 _syscall0(u32 nr) {
     u32 ret;
@@ -130,4 +131,12 @@ int chdir(char* pathname) {
 
 int chroot(char* pathname) {
     return _syscall1(SYS_NR_CHROOT, (u32)pathname);
+}
+
+int readdir(fd_t fd, dentry_t* dir, int count) {
+    return _syscall3(SYS_NR_READDIR, fd, (u32)dir, count);
+}
+
+void clear() {
+    _syscall0(SYS_NR_CLEAR);
 }

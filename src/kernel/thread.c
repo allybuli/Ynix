@@ -25,14 +25,18 @@ void test_recursion() {
     test_recursion();
 }
 
+extern int osh_main();
+
 static void user_init_thread() {
-    char buf[256];
-    
-    chroot("/d1");
-    chdir("/d2");
-    getcwd(buf, sizeof(buf));
-    printf("current work directory: %s\n", buf);
     while(true) {
+        pid_t pid = fork();
+        if(pid) {
+            u32 status = 0;
+            pid_t child = waitpid(pid, &status);
+            printf("wait pid %d status %d\n", child, status);
+        } else {
+            osh_main();
+        }
         char ch;
         read(stdin, &ch, 1);
         write(stdout, &ch, 1);

@@ -142,6 +142,10 @@ int sys_lseek(fd_t fd, off_t offset, int whence) {
     return file->offset;
 }
 
+int sys_readdir(fd_t fd, dentry_t* dir, int count) {
+    return sys_read(fd, (char*)dir, sizeof(dentry_t));
+}
+
 void file_init() {
     for(size_t i = 0; i < FILE_NR; i++) {
         file_t* file = &file_table[i];

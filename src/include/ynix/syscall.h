@@ -2,6 +2,7 @@
 #define YNIX_SYSCALL_H
 
 #include "types.h"
+#include "fs.h"
 
 typedef enum syscall_t {
     SYS_NR_TEST,
@@ -27,6 +28,8 @@ typedef enum syscall_t {
     SYS_NR_CHDIR,
     SYS_NR_CHROOT,
     SYS_NR_GETCWD,
+    SYS_NR_READDIR,
+    SYS_NR_CLEAR,
 } syscall_t;
 
 u32 test();
@@ -58,5 +61,8 @@ char* getcwd(char* buf, size_t size);
 int chdir(char* pathname);
 // 切换根目录
 int chroot(char* pathname);
+
+int readdir(fd_t fd, dentry_t* dir, int count);
+void clear();
 
 #endif
