@@ -67,7 +67,7 @@ inode_t *iget(dev_t dev, idx_t nr) {
     inode = get_free_inode();
     inode->dev = dev;
     inode->nr = nr;
-    inode->count = 1;
+    inode->count ++;
 
     // 加入超级块inode链表，统一管理
     list_push(&sb->inode_list, &inode->node);

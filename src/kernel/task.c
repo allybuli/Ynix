@@ -196,6 +196,9 @@ static task_t *task_create(target_t target, const char *name, u32 priority, u32 
     task->brk = KERNEL_MEMORY_SIZE; // todo
     task->iroot = get_root_inode();
     task->ipwd = get_root_inode();
+    task->iroot->count += 2;
+    task->pwd = (char*)alloc_kpage(1);
+    strcpy(task->pwd, "/");
     task->umask = 0022; // 对应0755
     task->magic = YNIX_MAGIC;
 
@@ -335,6 +338,19 @@ pid_t task_fork() {
 
     // 拷贝页目录
     child->pde = (u32)copy_pde();
+    // 拷贝pwd
+    child->pwd = (char*)alloc_kpage(1);
+    strncpy(child->pwd, task->pwd, PAGE_SIZE);
+
+    task->ipwd->count ++;
+    task->iroot->count ++;
+
+    for(size_t i = 0; i < TASK_FILE_NR; i++) {
+        file_t* file = child->files[i];
+        if(file) {
+            file->count ++;
+        }
+    }
 
     // 构造 child 内核栈
     task_build_stack(child); // ROP
@@ -355,6 +371,15 @@ void task_exit(int status) {
     free_pde();
     free_kpage((u32)task->vmap->bits, 1);
     kfree(task->vmap);
+    free_kpage((u32)task->pwd, 1);
+    iput(task->ipwd);
+    iput(task->iroot);
+    for(size_t i = 0; i < TASK_FILE_NR; i++) {
+        file_t* file = task->files[i];
+        if(file) {
+            close(i);
+        }
+    }
 
     // 0号进程是基本进程(空转)
     // 1号进程是init进程

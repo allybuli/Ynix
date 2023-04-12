@@ -119,3 +119,15 @@ fd_t creat(char* pathname, int mode) {
 void close(fd_t fd) {
     _syscall1(SYS_NR_CLOSE, fd);
 }
+
+char* getcwd(char* buf, size_t size) {
+    return (char*)_syscall2(SYS_NR_GETCWD, (u32)buf, size);
+}
+
+int chdir(char* pathname) {
+    return _syscall1(SYS_NR_CHDIR, (u32)pathname);
+}
+
+int chroot(char* pathname) {
+    return _syscall1(SYS_NR_CHROOT, (u32)pathname);
+}

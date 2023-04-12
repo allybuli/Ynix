@@ -24,6 +24,9 @@ typedef enum syscall_t {
     SYS_NR_CREAT,
     SYS_NR_CLOSE,
     SYS_NR_LSEEK,
+    SYS_NR_CHDIR,
+    SYS_NR_CHROOT,
+    SYS_NR_GETCWD,
 } syscall_t;
 
 u32 test();
@@ -49,5 +52,11 @@ int unlink(char *filename);
 fd_t open(char* pathname, int flags, int mode);
 fd_t creat(char* pathname, int mode);
 void close(fd_t fd);
+// 获取当前路径
+char* getcwd(char* buf, size_t size);
+// 切换当前目录
+int chdir(char* pathname);
+// 切换根目录
+int chroot(char* pathname);
 
 #endif
